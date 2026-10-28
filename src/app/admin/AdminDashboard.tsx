@@ -25,6 +25,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import QRCode from "qrcode";
+import { UnneLogo } from "@/components/UnneLogo";
 
 interface Comision {
   id: number;
@@ -304,14 +305,12 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-sm">
-              <GraduationCap className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-slate-900 leading-tight">
-                Panel de Cátedra
+            <UnneLogo variant="color" className="h-9 w-auto" />
+            <div className="hidden sm:block border-l border-slate-200 pl-3">
+              <h1 className="text-sm font-extrabold text-[#0A2540] leading-tight">
+                Cátedra Matemática Financiera
               </h1>
-              <p className="text-xs text-slate-500">{adminName}</p>
+              <p className="text-[11px] text-slate-500">{adminName}</p>
             </div>
           </div>
 

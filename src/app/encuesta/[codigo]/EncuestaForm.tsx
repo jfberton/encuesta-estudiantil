@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { RatingBar } from "@/components/RatingBar";
 import { SwitchButtons } from "@/components/SwitchButtons";
 import { getDeviceFingerprint } from "@/lib/fingerprint";
+import { UnneLogo } from "@/components/UnneLogo";
 import { CheckCircle2, Lock, Plus, Trash2, Send, AlertTriangle, ShieldCheck } from "lucide-react";
 
 interface DocenteItem {
@@ -49,7 +50,7 @@ export function EncuestaForm({
   const [ajustePrograma, setAjustePrograma] = useState(3);
   const [bibliografiaUtil, setBibliografiaUtil] = useState(3);
 
-  // Evaluaciones de Teoría (puede ser 1 o más)
+  // Evaluaciones de Teoría
   const [evaluacionesTeoria, setEvaluacionesTeoria] = useState<EvaluacionDocenteState[]>([
     {
       docenteId: docentesTeoria[0]?.id || 0,
@@ -60,7 +61,7 @@ export function EncuestaForm({
     },
   ]);
 
-  // Evaluaciones de Práctica (puede ser 1 o más)
+  // Evaluaciones de Práctica
   const [evaluacionesPractica, setEvaluacionesPractica] = useState<EvaluacionDocenteState[]>([
     {
       docenteId: docentesPractica[0]?.id || 0,
@@ -82,7 +83,7 @@ export function EncuestaForm({
   const [aspectosAMejorar, setAspectosAMejorar] = useState("");
   const [comentariosAdicionales, setComentariosAdicionales] = useState("");
 
-  // Al montar, chequear si ya la envió en este navegador
+  // Cargar si ya respondió
   useEffect(() => {
     try {
       const stored = localStorage.getItem(storageKey);
@@ -107,7 +108,7 @@ export function EncuestaForm({
     }
   }, [storageKey]);
 
-  // Manejadores para agregar/quitar docentes de teoría
+  // Docentes teoría
   const agregarDocenteTeoria = () => {
     const yaSeleccionados = new Set(evaluacionesTeoria.map((e) => e.docenteId));
     const siguienteDisponible = docentesTeoria.find((d) => !yaSeleccionados.has(d.id));
@@ -138,7 +139,7 @@ export function EncuestaForm({
     setEvaluacionesTeoria(copy);
   };
 
-  // Manejadores para agregar/quitar docentes de práctica
+  // Docentes práctica
   const agregarDocentePractica = () => {
     const yaSeleccionados = new Set(evaluacionesPractica.map((e) => e.docenteId));
     const siguienteDisponible = docentesPractica.find((d) => !yaSeleccionados.has(d.id));
@@ -169,7 +170,7 @@ export function EncuestaForm({
     setEvaluacionesPractica(copy);
   };
 
-  // Envío del Formulario
+  // Enviar encuesta
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -213,7 +214,6 @@ export function EncuestaForm({
         return;
       }
 
-      // Guardar en LocalStorage para bloquear posteriores envíos y habilitar revisión
       localStorage.setItem(
         storageKey,
         JSON.stringify({
@@ -225,7 +225,7 @@ export function EncuestaForm({
       );
 
       setIsReadOnly(true);
-      setSuccessMessage("¡Tus respuestas fueron enviadas con éxito! Muchas gracias por participar.");
+      setSuccessMessage("¡Tus respuestas fueron enviadas con éxito a la Cátedra! Muchas gracias por participar.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error de conexión";
@@ -237,36 +237,37 @@ export function EncuestaForm({
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 space-y-6">
-      {/* Cabecera */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+      {/* Cabecera UNNE */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/90 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <UnneLogo variant="color" className="h-10 w-auto" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <ShieldCheck className="w-3.5 h-3.5" /> 100% Anónima
-          </span>
-          <span className="text-xs font-medium text-slate-500">
-            {comision.materia} • Ciclo {comision.cicloLectivo}
           </span>
         </div>
 
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+        <div className="space-y-1">
+          <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">
+            Cátedra de Matemática Financiera
+          </span>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#0A2540] tracking-tight">
             Encuesta de Opinión Estudiantil
           </h1>
-          <p className="text-sm font-medium text-indigo-600 mt-0.5">
-            {comision.nombre}
+          <p className="text-xs sm:text-sm font-semibold text-slate-600">
+            {comision.nombre} • Ciclo Lectivo {comision.cicloLectivo}
           </p>
         </div>
 
-        <div className="bg-slate-50 rounded-xl p-4 text-xs sm:text-sm text-slate-600 leading-relaxed border border-slate-100">
+        <div className="bg-[#0A2540]/5 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed border border-[#0A2540]/10">
           <strong>Introducción:</strong> Esta encuesta es 100% anónima. Su objetivo es
           conocer tu experiencia durante la cursada para identificar fortalezas y aspectos a
           mejorar en el dictado de la materia.
         </div>
       </div>
 
-      {/* Cartel de Alerta si ya fue enviada (Modo Sólo Lectura) */}
+      {/* Cartel de Alerta si ya fue enviada */}
       {isReadOnly && (
-        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 text-amber-900 shadow-sm flex items-start gap-3.5 animate-fadeIn">
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 text-amber-900 shadow-sm flex items-start gap-3.5">
           <Lock className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <h3 className="font-bold text-sm sm:text-base">
@@ -281,7 +282,7 @@ export function EncuestaForm({
         </div>
       )}
 
-      {/* Cartel de Éxito inmediato */}
+      {/* Cartel de Éxito */}
       {successMessage && (
         <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-5 text-emerald-900 shadow-sm flex items-start gap-3.5">
           <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
@@ -306,8 +307,8 @@ export function EncuestaForm({
         {/* SECCIÓN 1: Planificación y Contenidos */}
         <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-6">
           <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-              Sección 1
+            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+              1. Planificación y Contenidos
             </span>
             <h2 className="text-lg font-bold text-slate-900">
               Planificación y Contenidos de la Materia
@@ -343,12 +344,12 @@ export function EncuestaForm({
         {/* SECCIÓN 2: Desempeño Docente */}
         <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-6">
           <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-              Sección 2
+            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+              2. Desempeño Docente
             </span>
-            <h2 className="text-lg font-bold text-slate-900">Desempeño Docente</h2>
+            <h2 className="text-lg font-bold text-slate-900">Evaluación del Cuerpo Docente</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Evaluá a los docentes de Teoría y Práctica con los que cursaste.
+              Evaluá a los docentes de Teoría y Práctica a cuyas clases asististe.
             </p>
           </div>
 
@@ -363,10 +364,10 @@ export function EncuestaForm({
             {evaluacionesTeoria.map((ev, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50/70 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-4"
+                className="bg-slate-50/80 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md">
+                  <span className="text-xs font-bold text-[#0A2540] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
                     Profesor de Teoría #{idx + 1}
                   </span>
                   {!isReadOnly && evaluacionesTeoria.length > 1 && (
@@ -382,7 +383,7 @@ export function EncuestaForm({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Seleccioná al docente de Teoría:
+                    Profesor de Teoría al que asististe:
                   </label>
                   <select
                     disabled={isReadOnly}
@@ -390,7 +391,7 @@ export function EncuestaForm({
                     onChange={(e) =>
                       actualizarTeoria(idx, "docenteId", Number(e.target.value))
                     }
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-800 focus:outline-none"
                   >
                     {docentesTeoria.map((d) => (
                       <option key={d.id} value={d.id}>
@@ -441,7 +442,7 @@ export function EncuestaForm({
               <button
                 type="button"
                 onClick={agregarDocenteTeoria}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-indigo-300 text-indigo-700 font-semibold text-xs sm:text-sm hover:bg-indigo-50/50 flex items-center justify-center gap-2 transition cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer"
               >
                 <Plus className="w-4 h-4" /> Agregar otro profesor de Teoría
               </button>
@@ -452,18 +453,18 @@ export function EncuestaForm({
           <div className="space-y-4 pt-4 border-t border-slate-200">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-                Profesor(es) de Práctica
+                Profesor(es) de Práctico
               </h3>
             </div>
 
             {evaluacionesPractica.map((ev, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50/70 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-4"
+                className="bg-slate-50/80 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md">
-                    Profesor de Práctica #{idx + 1}
+                  <span className="text-xs font-bold text-[#0A2540] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                    Profesor de Práctico #{idx + 1}
                   </span>
                   {!isReadOnly && evaluacionesPractica.length > 1 && (
                     <button
@@ -478,7 +479,7 @@ export function EncuestaForm({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Seleccioná al docente de Práctica:
+                    Profesor de Práctico al que asististe:
                   </label>
                   <select
                     disabled={isReadOnly}
@@ -486,7 +487,7 @@ export function EncuestaForm({
                     onChange={(e) =>
                       actualizarPractica(idx, "docenteId", Number(e.target.value))
                     }
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-800 focus:outline-none"
                   >
                     {docentesPractica.map((d) => (
                       <option key={d.id} value={d.id}>
@@ -541,7 +542,7 @@ export function EncuestaForm({
               <button
                 type="button"
                 onClick={agregarDocentePractica}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-indigo-300 text-indigo-700 font-semibold text-xs sm:text-sm hover:bg-indigo-50/50 flex items-center justify-center gap-2 transition cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer"
               >
                 <Plus className="w-4 h-4" /> Agregar otro profesor de Práctica
               </button>
@@ -564,11 +565,11 @@ export function EncuestaForm({
         {/* SECCIÓN 3: Evaluaciones y Perfil */}
         <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-6">
           <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-              Sección 3
+            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+              3. Evaluaciones y Situación Académica
             </span>
             <h2 className="text-lg font-bold text-slate-900">
-              Evaluaciones y Situación Académica
+              Evaluaciones y Devoluciones
             </h2>
           </div>
 
@@ -596,7 +597,7 @@ export function EncuestaForm({
 
           <div className="space-y-3 pt-3 border-t border-slate-100">
             <label className="block text-sm font-medium text-slate-800">
-              ¿Sos recursante de la materia?
+              ¿Sos recursante de Matemática Financiera?
             </label>
             <SwitchButtons
               value={recursante}
@@ -607,7 +608,7 @@ export function EncuestaForm({
 
           <div className="space-y-3 pt-3 border-t border-slate-100">
             <label className="block text-sm font-medium text-slate-800">
-              ¿Considerás que contás con los conocimientos previos necesarios para cursar la materia?
+              ¿Considerás que tenés los conocimientos previos necesarios para cursar la materia?
             </label>
             <SwitchButtons
               value={conocimientosPrevios}
@@ -620,15 +621,12 @@ export function EncuestaForm({
         {/* SECCIÓN 4: Preguntas Abiertas */}
         <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
           <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-              Sección 4
+            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+              4. Preguntas Abiertas (Cualitativas)
             </span>
             <h2 className="text-lg font-bold text-slate-900">
-              Preguntas Abiertas (Cualitativas)
+              Aportes y Sugerencias a la Cátedra
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Tu opinión sincera nos ayuda a seguir mejorando año a año.
-            </p>
           </div>
 
           <div className="space-y-2">
@@ -641,7 +639,7 @@ export function EncuestaForm({
               value={puntosPositivos}
               onChange={(e) => setPuntosPositivos(e.target.value)}
               placeholder="Escribí aquí los puntos destacados..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
+              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-blue-800 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
             />
           </div>
 
@@ -655,7 +653,7 @@ export function EncuestaForm({
               value={aspectosAMejorar}
               onChange={(e) => setAspectosAMejorar(e.target.value)}
               placeholder="Escribí aquí tus sugerencias de mejora..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
+              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-blue-800 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
             />
           </div>
 
@@ -669,7 +667,7 @@ export function EncuestaForm({
               value={comentariosAdicionales}
               onChange={(e) => setComentariosAdicionales(e.target.value)}
               placeholder="Cualquier otro comentario que desees sumar..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
+              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-blue-800 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
             />
           </div>
         </section>
@@ -677,23 +675,23 @@ export function EncuestaForm({
         {/* Botón de Enviar */}
         <div className="sticky bottom-4 pt-2">
           {isReadOnly ? (
-            <div className="bg-slate-900/90 backdrop-blur-md text-white p-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-semibold text-sm">
+            <div className="bg-[#0A2540] text-white p-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-semibold text-sm border border-amber-400/40">
               <Lock className="w-4 h-4 text-amber-400" /> Respuestas registradas - Modo revisión
             </div>
           ) : (
             <button
               type="submit"
               disabled={submitting || !comision.activa}
-              className="w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] disabled:bg-slate-400 text-white font-bold text-base shadow-lg shadow-indigo-200 flex items-center justify-center gap-2.5 transition duration-150 cursor-pointer"
+              className="w-full py-4 px-6 rounded-2xl bg-[#0A2540] hover:bg-[#081d32] active:scale-[0.99] disabled:bg-slate-400 text-white font-bold text-base shadow-lg shadow-blue-900/30 border border-amber-400/40 flex items-center justify-center gap-2.5 transition duration-150 cursor-pointer"
             >
               {submitting ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Guardando respuestas...</span>
+                  <span>Registrando respuestas...</span>
                 </>
               ) : (
                 <>
-                  <Send className="w-5 h-5" />
+                  <Send className="w-5 h-5 text-amber-400" />
                   <span>Guardar y Enviar Encuesta</span>
                 </>
               )}
