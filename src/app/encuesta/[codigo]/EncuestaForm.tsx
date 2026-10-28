@@ -240,7 +240,7 @@ export function EncuestaForm({
       {/* Cabecera UNNE */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/90 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-          <UnneLogo variant="color" className="h-10 w-auto" />
+          <UnneLogo className="h-10 sm:h-12 w-auto" />
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <ShieldCheck className="w-3.5 h-3.5" /> 100% Anónima
           </span>

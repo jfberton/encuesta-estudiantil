@@ -42,22 +42,29 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { nombre, materia, cicloLectivo, codigoAcceso } = await req.json();
+    const { nombre, materia, cicloLectivo, codigoAcceso, activa } = await req.json();
 
-    if (!nombre || !codigoAcceso) {
-      return NextResponse.json({ error: "Nombre y código son obligatorios" }, { status: 400 });
+    if (!nombre) {
+      return NextResponse.json({ error: "El nombre de la comisión es obligatorio" }, { status: 400 });
     }
 
-    const cleanCodigo = codigoAcceso.trim().toLowerCase().replace(/\s+/g, "-");
+    const baseCodigo = codigoAcceso || nombre;
+    const cleanCodigo = baseCodigo
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
     const [nueva] = await db
       .insert(comisiones)
       .values({
         nombre: nombre.trim(),
-        materia: materia?.trim() || "Cátedra",
+        materia: materia?.trim() || "Matemática Financiera",
         cicloLectivo: cicloLectivo?.trim() || "2026",
-        codigoAcceso: cleanCodigo,
-        activa: false,
+        codigoAcceso: cleanCodigo || `comision-${Date.now().toString(36)}`,
+        activa: activa !== undefined ? Boolean(activa) : true,
       })
       .returning();
 
