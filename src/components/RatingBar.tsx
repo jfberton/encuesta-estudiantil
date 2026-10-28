@@ -21,7 +21,7 @@ export function RatingBar({
 
   return (
     <div className="w-full space-y-1.5">
-      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+      <div className="grid grid-cols-5 gap-2">
         {options.map((num) => {
           const isSelected = value === num;
           return (
@@ -31,13 +31,13 @@ export function RatingBar({
               disabled={readOnly}
               onClick={() => onChange(num)}
               className={`
-                h-12 sm:h-11 rounded-xl font-bold text-base transition-all duration-150 flex items-center justify-center select-none
+                h-11 sm:h-10 rounded-xl text-sm transition-all duration-150 flex items-center justify-center select-none
                 ${
                   isSelected
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-[1.02] ring-2 ring-indigo-400"
-                    : "bg-white text-slate-700 border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50"
+                    ? "bg-[#18181B] text-white font-semibold border border-[#18181B] shadow-xs"
+                    : "bg-white text-stone-700 font-normal border border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
                 }
-                ${readOnly ? "cursor-default opacity-90" : "active:scale-95 cursor-pointer"}
+                ${readOnly ? "cursor-default opacity-85" : "active:scale-[0.98] cursor-pointer"}
               `}
             >
               {num}
@@ -45,7 +45,7 @@ export function RatingBar({
           );
         })}
       </div>
-      <div className="flex justify-between text-[11px] text-slate-500 px-1 select-none">
+      <div className="flex justify-between text-[11px] text-stone-400 font-normal px-0.5 select-none">
         <span>{labelMin}</span>
         <span>{labelMax}</span>
       </div>

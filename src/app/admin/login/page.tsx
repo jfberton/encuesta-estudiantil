@@ -41,8 +41,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-100/70 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-xl space-y-6">
+    <main className="min-h-screen bg-[#FAF9F5] flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-stone-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] space-y-6">
         {/* Logo Institucional Oficial */}
         <div className="flex justify-center pb-2">
           <UnneLogo className="h-11 sm:h-12 w-auto" subtitulo="Cátedra: Matemática Financiera" />
@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl bg-[#0A2540] hover:bg-[#123358] active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-slate-900/10 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
+            className="w-full py-3.5 px-4 rounded-xl bg-[#18181B] hover:bg-[#27272A] active:scale-[0.99] text-white font-medium text-sm shadow-xs flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

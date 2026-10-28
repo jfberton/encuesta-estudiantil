@@ -246,26 +246,26 @@ export function EncuestaForm({
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12 space-y-6">
       {/* Cabecera UNNE */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/90 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-          <UnneLogo className="h-10 sm:h-12 w-auto" />
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <ShieldCheck className="w-3.5 h-3.5" /> 100% Anónima
+      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-stone-200/70 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-4">
+          <UnneLogo className="h-10 sm:h-11 w-auto" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-600 border border-stone-200/60">
+            <ShieldCheck className="w-3.5 h-3.5 text-stone-500" /> 100% Anónima
           </span>
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[#0A2540] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
             Encuesta de Opinión Estudiantil
           </h1>
-          <p className="text-xs sm:text-sm font-semibold text-slate-600">
+          <p className="text-xs sm:text-sm text-stone-500 font-normal">
             {comision.nombre} • Ciclo Lectivo {comision.cicloLectivo}
           </p>
         </div>
 
-        <div className="bg-[#0A2540]/5 rounded-xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed border border-[#0A2540]/10">
+        <div className="bg-stone-50/80 rounded-2xl p-4 text-xs sm:text-sm text-stone-600 leading-relaxed border border-stone-200/60 font-normal">
           <strong>Introducción:</strong> Esta encuesta es 100% anónima. Su objetivo es
           conocer tu experiencia durante la cursada para identificar fortalezas y aspectos a
           mejorar en el dictado de la materia.
@@ -274,13 +274,13 @@ export function EncuestaForm({
 
       {/* Cartel de Alerta si ya fue enviada */}
       {isReadOnly && (
-        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 text-amber-900 shadow-sm flex items-start gap-3.5">
-          <Lock className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+        <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5 text-stone-800 shadow-xs flex items-start gap-3.5">
+          <Lock className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h3 className="font-bold text-sm sm:text-base">
+            <h3 className="font-semibold text-sm sm:text-base">
               Encuesta finalizada (Modo sólo lectura)
             </h3>
-            <p className="text-xs sm:text-sm text-amber-800">
+            <p className="text-xs sm:text-sm text-stone-500 font-normal leading-relaxed">
               Esta encuesta ya fue enviada desde este dispositivo. A continuación podés revisar
               las respuestas que emitiste, pero no es posible modificar ni volver a enviar el
               formulario.
@@ -291,11 +291,11 @@ export function EncuestaForm({
 
       {/* Cartel de Éxito */}
       {successMessage && (
-        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-5 text-emerald-900 shadow-sm flex items-start gap-3.5">
-          <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="bg-stone-50 border border-stone-300 rounded-2xl p-5 text-stone-900 shadow-xs flex items-start gap-3.5">
+          <CheckCircle2 className="w-5 h-5 text-stone-700 shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-bold text-sm sm:text-base">{successMessage}</h3>
-            <p className="text-xs text-emerald-700 mt-0.5">
+            <h3 className="font-semibold text-sm sm:text-base">{successMessage}</h3>
+            <p className="text-xs text-stone-500 mt-0.5 font-normal">
               Tus respuestas ya quedaron registradas en la base de datos de la cátedra.
             </p>
           </div>
@@ -304,7 +304,7 @@ export function EncuestaForm({
 
       {/* Cartel de Error */}
       {errorMessage && (
-        <div className="bg-rose-50 border border-rose-300 rounded-2xl p-4 text-rose-900 shadow-sm flex items-start gap-3">
+        <div className="bg-rose-50/60 border border-rose-200 rounded-2xl p-4 text-rose-800 shadow-xs flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <p className="text-sm font-medium">{errorMessage}</p>
         </div>
@@ -312,21 +312,21 @@ export function EncuestaForm({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* SECCIÓN 1: Planificación y Contenidos */}
-        <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-6">
-          <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+        <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-stone-200/70 space-y-6">
+          <div className="border-b border-stone-100 pb-3.5">
+            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-widest">
               1. Planificación y Contenidos
             </span>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-0.5">
               Planificación y Contenidos de la Materia
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-stone-400 mt-0.5 font-normal">
               Escala del 1 al 5: 1 = Muy en desacuerdo / Deficiente, 5 = Muy de acuerdo / Excelente
             </p>
           </div>
 
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-800">
+            <label className="block text-sm font-medium text-stone-800">
               Los contenidos dictados se ajustaron al programa de la materia.
             </label>
             <RatingBar
@@ -336,8 +336,8 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-3 pt-2 border-t border-slate-100">
-            <label className="block text-sm font-medium text-slate-800">
+          <div className="space-y-3 pt-3 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
               La bibliografía y el material de estudio estuvieron accesibles y fueron útiles para el aprendizaje.
             </label>
             <RatingBar
@@ -349,13 +349,15 @@ export function EncuestaForm({
         </section>
 
         {/* SECCIÓN 2: Desempeño Docente */}
-        <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-6">
-          <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+        <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-stone-200/70 space-y-6">
+          <div className="border-b border-stone-100 pb-3.5">
+            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-widest">
               2. Desempeño Docente
             </span>
-            <h2 className="text-lg font-bold text-slate-900">Evaluación del Cuerpo Docente</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-0.5">
+              Evaluación del Cuerpo Docente
+            </h2>
+            <p className="text-xs text-stone-400 mt-0.5 font-normal">
               Evaluá a los docentes de Teoría y Práctica a cuyas clases asististe.
             </p>
           </div>
@@ -363,7 +365,7 @@ export function EncuestaForm({
           {/* DOCENTES DE TEORÍA */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+              <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
                 Profesor(es) de Teoría
               </h3>
             </div>
@@ -371,17 +373,17 @@ export function EncuestaForm({
             {evaluacionesTeoria.map((ev, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50/80 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-4"
+                className="bg-stone-50/60 rounded-2xl p-5 border border-stone-200/70 space-y-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-bold text-[#0A2540] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                  <span className="text-xs font-medium text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200/70 shadow-2xs">
                     Profesor de Teoría #{idx + 1}
                   </span>
                   {!isReadOnly && evaluacionesTeoria.length > 1 && (
                     <button
                       type="button"
                       onClick={() => quitarDocenteTeoria(idx)}
-                      className="text-rose-600 hover:text-rose-800 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                      className="text-stone-400 hover:text-rose-600 text-xs font-medium flex items-center gap-1 cursor-pointer transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Quitar
                     </button>
@@ -389,7 +391,7 @@ export function EncuestaForm({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-stone-700 mb-1.5">
                     Profesor de Teoría al que asististe:
                   </label>
                   <select
@@ -398,10 +400,10 @@ export function EncuestaForm({
                     onChange={(e) =>
                       actualizarTeoria(idx, "docenteId", Number(e.target.value))
                     }
-                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none transition ${
+                    className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-sm font-normal focus:border-stone-500 focus:outline-none transition ${
                       ev.docenteId === 0
-                        ? "border-amber-400 text-slate-500 bg-amber-50/20"
-                        : "border-slate-300 text-slate-800"
+                        ? "border-amber-300 bg-amber-50/20 text-stone-500"
+                        : "border-stone-200 text-stone-800"
                     }`}
                   >
                     <option value="" disabled>
@@ -424,9 +426,9 @@ export function EncuestaForm({
                   </select>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-medium text-slate-700">
-                    <strong>Claridad pedagógica:</strong> El docente explicó los temas de forma clara y accesible.
+                <div className="space-y-2 pt-2 border-t border-stone-200/50">
+                  <label className="block text-xs font-normal text-stone-700">
+                    <strong className="font-semibold text-stone-800">Claridad pedagógica:</strong> El docente explicó los temas de forma clara y accesible.
                   </label>
                   <RatingBar
                     value={ev.claridadPedagogica}
@@ -435,9 +437,9 @@ export function EncuestaForm({
                   />
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-medium text-slate-700">
-                    <strong>Disposición a consultas:</strong> Mostró apertura para resolver dudas durante las clases o con posterioridad a ellas.
+                <div className="space-y-2 pt-2 border-t border-stone-200/50">
+                  <label className="block text-xs font-normal text-stone-700">
+                    <strong className="font-semibold text-stone-800">Disposición a consultas:</strong> Mostró apertura para resolver dudas durante las clases o con posterioridad a ellas.
                   </label>
                   <RatingBar
                     value={ev.disposicionConsultas}
@@ -446,9 +448,9 @@ export function EncuestaForm({
                   />
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-medium text-slate-700">
-                    <strong>Puntualidad y cumplimiento:</strong> Cumplió con los horarios y el cronograma pautado.
+                <div className="space-y-2 pt-2 border-t border-stone-200/50">
+                  <label className="block text-xs font-normal text-stone-700">
+                    <strong className="font-semibold text-stone-800">Puntualidad y cumplimiento:</strong> Cumplió con los horarios y el cronograma pautado.
                   </label>
                   <RatingBar
                     value={ev.puntualidadCumplimiento}
@@ -466,7 +468,7 @@ export function EncuestaForm({
                 type="button"
                 onClick={agregarDocenteTeoria}
                 disabled={evaluacionesTeoria.some((e) => !e.docenteId || e.docenteId <= 0)}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-stone-300 text-stone-600 font-medium text-xs sm:text-sm hover:bg-stone-50 hover:text-stone-900 hover:border-stone-400 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" /> Agregar otro profesor de Teoría
               </button>
@@ -474,9 +476,9 @@ export function EncuestaForm({
           </div>
 
           {/* DOCENTES DE PRÁCTICA */}
-          <div className="space-y-4 pt-4 border-t border-slate-200">
+          <div className="space-y-4 pt-4 border-t border-stone-100">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+              <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
                 Profesor(es) de Práctico
               </h3>
             </div>
@@ -484,17 +486,17 @@ export function EncuestaForm({
             {evaluacionesPractica.map((ev, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50/80 rounded-xl p-4 sm:p-5 border border-slate-200 space-y-4"
+                className="bg-stone-50/60 rounded-2xl p-5 border border-stone-200/70 space-y-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-bold text-[#0A2540] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                  <span className="text-xs font-medium text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200/70 shadow-2xs">
                     Profesor de Práctico #{idx + 1}
                   </span>
                   {!isReadOnly && evaluacionesPractica.length > 1 && (
                     <button
                       type="button"
                       onClick={() => quitarDocentePractica(idx)}
-                      className="text-rose-600 hover:text-rose-800 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                      className="text-stone-400 hover:text-rose-600 text-xs font-medium flex items-center gap-1 cursor-pointer transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Quitar
                     </button>
@@ -502,7 +504,7 @@ export function EncuestaForm({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-stone-700 mb-1.5">
                     Profesor de Práctico al que asististe:
                   </label>
                   <select
@@ -511,10 +513,10 @@ export function EncuestaForm({
                     onChange={(e) =>
                       actualizarPractica(idx, "docenteId", Number(e.target.value))
                     }
-                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none transition ${
+                    className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-sm font-normal focus:border-stone-500 focus:outline-none transition ${
                       ev.docenteId === 0
-                        ? "border-amber-400 text-slate-500 bg-amber-50/20"
-                        : "border-slate-300 text-slate-800"
+                        ? "border-amber-300 bg-amber-50/20 text-stone-500"
+                        : "border-stone-200 text-stone-800"
                     }`}
                   >
                     <option value="" disabled>
@@ -537,9 +539,9 @@ export function EncuestaForm({
                   </select>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-medium text-slate-700">
-                    <strong>Claridad pedagógica:</strong> El docente explicó los temas de forma clara y accesible.
+                <div className="space-y-2 pt-2 border-t border-stone-200/50">
+                  <label className="block text-xs font-normal text-stone-700">
+                    <strong className="font-semibold text-stone-800">Claridad pedagógica:</strong> El docente explicó los temas de forma clara y accesible.
                   </label>
                   <RatingBar
                     value={ev.claridadPedagogica}
@@ -550,9 +552,9 @@ export function EncuestaForm({
                   />
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-medium text-slate-700">
-                    <strong>Disposición a consultas:</strong> Mostró apertura para resolver dudas durante las clases o con posterioridad a ellas.
+                <div className="space-y-2 pt-2 border-t border-stone-200/50">
+                  <label className="block text-xs font-normal text-stone-700">
+                    <strong className="font-semibold text-stone-800">Disposición a consultas:</strong> Mostró apertura para resolver dudas durante las clases o con posterioridad a ellas.
                   </label>
                   <RatingBar
                     value={ev.disposicionConsultas}
@@ -563,9 +565,9 @@ export function EncuestaForm({
                   />
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-medium text-slate-700">
-                    <strong>Puntualidad y cumplimiento:</strong> Cumplió con los horarios y el cronograma pautado.
+                <div className="space-y-2 pt-2 border-t border-stone-200/50">
+                  <label className="block text-xs font-normal text-stone-700">
+                    <strong className="font-semibold text-stone-800">Puntualidad y cumplimiento:</strong> Cumplió con los horarios y el cronograma pautado.
                   </label>
                   <RatingBar
                     value={ev.puntualidadCumplimiento}
@@ -583,7 +585,7 @@ export function EncuestaForm({
                 type="button"
                 onClick={agregarDocentePractica}
                 disabled={evaluacionesPractica.some((e) => !e.docenteId || e.docenteId <= 0)}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-stone-300 text-stone-600 font-medium text-xs sm:text-sm hover:bg-stone-50 hover:text-stone-900 hover:border-stone-400 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" /> Agregar otro profesor de Práctica
               </button>
@@ -591,9 +593,9 @@ export function EncuestaForm({
           </div>
 
           {/* ARTICULACIÓN TEORÍA-PRÁCTICA */}
-          <div className="space-y-3 pt-4 border-t border-slate-200">
-            <label className="block text-sm font-medium text-slate-800">
-              <strong>Articulación teoría-práctica:</strong> Las actividades prácticas y trabajos ayudaron a fijar los conceptos teóricos.
+          <div className="space-y-3 pt-4 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
+              <strong className="font-semibold text-stone-900">Articulación teoría-práctica:</strong> Las actividades prácticas y trabajos ayudaron a fijar los conceptos teóricos.
             </label>
             <RatingBar
               value={articulacionTeoriaPractica}
@@ -604,18 +606,18 @@ export function EncuestaForm({
         </section>
 
         {/* SECCIÓN 3: Evaluaciones y Perfil */}
-        <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-6">
-          <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+        <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-stone-200/70 space-y-6">
+          <div className="border-b border-stone-100 pb-3.5">
+            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-widest">
               3. Evaluaciones y Situación Académica
             </span>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-0.5">
               Evaluaciones y Devoluciones
             </h2>
           </div>
 
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-800">
+            <label className="block text-sm font-medium text-stone-800">
               Los exámenes/parciales guardaron coherencia con lo enseñado en clase. (Escala 1 al 5)
             </label>
             <RatingBar
@@ -625,8 +627,8 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-3 pt-3 border-t border-slate-100">
-            <label className="block text-sm font-medium text-slate-800">
+          <div className="space-y-3 pt-3 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
               ¿Practicaste con ejemplos de parciales previos?
             </label>
             <SwitchButtons
@@ -636,8 +638,8 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-3 pt-3 border-t border-slate-100">
-            <label className="block text-sm font-medium text-slate-800">
+          <div className="space-y-3 pt-3 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
               ¿Sos recursante de Matemática Financiera?
             </label>
             <SwitchButtons
@@ -647,8 +649,8 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-3 pt-3 border-t border-slate-100">
-            <label className="block text-sm font-medium text-slate-800">
+          <div className="space-y-3 pt-3 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
               ¿Considerás que tenés los conocimientos previos necesarios para cursar la materia?
             </label>
             <SwitchButtons
@@ -660,18 +662,18 @@ export function EncuestaForm({
         </section>
 
         {/* SECCIÓN 4: Preguntas Abiertas */}
-        <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <span className="text-xs font-bold text-[#0A2540] uppercase tracking-wider">
+        <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] border border-stone-200/70 space-y-5">
+          <div className="border-b border-stone-100 pb-3.5">
+            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-widest">
               4. Preguntas Abiertas (Cualitativas)
             </span>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-0.5">
               Aportes y Sugerencias a la Cátedra
             </h2>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-slate-800">
+            <label className="block text-sm font-medium text-stone-800">
               ¿Cuáles considerás que fueron los mayores puntos positivos de la cátedra este ciclo lectivo?
             </label>
             <textarea
@@ -680,12 +682,12 @@ export function EncuestaForm({
               value={puntosPositivos}
               onChange={(e) => setPuntosPositivos(e.target.value)}
               placeholder="Escribí aquí los puntos destacados..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-blue-800 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
+              className="w-full rounded-2xl border border-stone-200 p-3.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 bg-white disabled:bg-stone-50 font-normal transition placeholder:text-stone-400"
             />
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            <label className="block text-sm font-semibold text-slate-800">
+          <div className="space-y-2 pt-2 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
               ¿Qué aspectos específicos considerás que deberían revisarse o mejorarse para las próximas cohortes?
             </label>
             <textarea
@@ -694,13 +696,13 @@ export function EncuestaForm({
               value={aspectosAMejorar}
               onChange={(e) => setAspectosAMejorar(e.target.value)}
               placeholder="Escribí aquí tus sugerencias de mejora..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-blue-800 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
+              className="w-full rounded-2xl border border-stone-200 p-3.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 bg-white disabled:bg-stone-50 font-normal transition placeholder:text-stone-400"
             />
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            <label className="block text-sm font-semibold text-slate-800">
-              Comentarios o sugerencias adicionales: <span className="text-xs font-normal text-slate-500">(Opcional)</span>
+          <div className="space-y-2 pt-2 border-t border-stone-100">
+            <label className="block text-sm font-medium text-stone-800">
+              Comentarios o sugerencias adicionales: <span className="text-xs font-normal text-stone-400">(Opcional)</span>
             </label>
             <textarea
               disabled={isReadOnly}
@@ -708,22 +710,22 @@ export function EncuestaForm({
               value={comentariosAdicionales}
               onChange={(e) => setComentariosAdicionales(e.target.value)}
               placeholder="Cualquier otro comentario que desees sumar..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-800 focus:ring-2 focus:ring-blue-800 focus:outline-none disabled:bg-slate-50 disabled:text-slate-600"
+              className="w-full rounded-2xl border border-stone-200 p-3.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 bg-white disabled:bg-stone-50 font-normal transition placeholder:text-stone-400"
             />
           </div>
         </section>
 
         {/* Botón de Enviar (al final del formulario, sin flotar en pantalla) */}
-        <div className="pt-4 pb-10">
+        <div className="pt-4 pb-12">
           {isReadOnly ? (
-            <div className="bg-[#0A2540] text-white p-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-semibold text-sm border border-amber-400/40">
-              <Lock className="w-4 h-4 text-amber-400" /> Respuestas registradas - Modo revisión
+            <div className="bg-[#18181B] text-white p-4 rounded-2xl shadow-xs flex items-center justify-center gap-2 font-medium text-sm">
+              <Lock className="w-4 h-4 text-stone-400" /> Respuestas registradas - Modo revisión
             </div>
           ) : (
             <button
               type="submit"
               disabled={submitting || !comision.activa}
-              className="w-full py-4 px-6 rounded-2xl bg-[#0A2540] hover:bg-[#081d32] active:scale-[0.99] disabled:bg-slate-400 text-white font-bold text-base shadow-lg shadow-blue-900/30 border border-amber-400/40 flex items-center justify-center gap-2.5 transition duration-150 cursor-pointer"
+              className="w-full py-4 px-6 rounded-2xl bg-[#18181B] hover:bg-[#27272A] active:scale-[0.99] disabled:bg-stone-300 text-white font-medium text-sm sm:text-base border border-[#18181B] shadow-xs flex items-center justify-center gap-2.5 transition duration-150 cursor-pointer"
             >
               {submitting ? (
                 <>
@@ -732,7 +734,7 @@ export function EncuestaForm({
                 </>
               ) : (
                 <>
-                  <Send className="w-5 h-5 text-amber-400" />
+                  <Send className="w-4 h-4 text-stone-300" />
                   <span>Guardar y Enviar Encuesta</span>
                 </>
               )}

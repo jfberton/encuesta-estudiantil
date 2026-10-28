@@ -332,19 +332,19 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
   const encuestasCerradas = comisiones.filter((c) => !c.activa);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
+    <div className="min-h-screen bg-[#FAF9F5] text-stone-800 pb-20">
       {/* Barra Superior Institucional */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+      <header className="bg-white border-b border-stone-200/80 sticky top-0 z-30 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <UnneLogo className="h-10 sm:h-11 w-auto" subtitulo="Cátedra: Matemática Financiera" />
 
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-block text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
+            <span className="hidden sm:inline-block text-xs font-medium text-stone-500 bg-stone-100 px-3 py-1.5 rounded-full">
               {adminName}
             </span>
             <button
               onClick={handleLogout}
-              className="py-1.5 px-3 rounded-xl border border-slate-200 text-slate-600 hover:text-rose-700 hover:bg-rose-50 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+              className="py-1.5 px-3 rounded-xl border border-stone-200 text-stone-600 hover:text-rose-700 hover:bg-rose-50 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" /> Salir
             </button>
@@ -352,19 +352,19 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
         </div>
 
         {/* Pestañas de Navegación */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 sm:gap-6 border-t border-slate-100 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 sm:gap-6 border-t border-stone-100 overflow-x-auto">
           <button
             onClick={() => setTab("comisiones")}
-            className={`py-3.5 px-2 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
+            className={`py-3.5 px-2 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
               tab === "comisiones"
-                ? "border-[#0A2540] text-[#0A2540]"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-[#18181B] text-stone-900"
+                : "border-transparent text-stone-400 hover:text-stone-700"
             }`}
           >
             <Radio className="w-4 h-4 text-emerald-600" />
             <span>Encuestas y Códigos QR</span>
             {encuestasAbiertas.length > 0 && (
-              <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full">
+              <span className="bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
                 {encuestasAbiertas.length} activa{encuestasAbiertas.length > 1 ? "s" : ""}
               </span>
             )}
@@ -375,10 +375,10 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
               setTab("stats");
               cargarStats(selectedComisionId);
             }}
-            className={`py-3.5 px-2 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
+            className={`py-3.5 px-2 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
               tab === "stats"
-                ? "border-[#0A2540] text-[#0A2540]"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-[#18181B] text-stone-900"
+                : "border-transparent text-stone-400 hover:text-stone-700"
             }`}
           >
             <BarChart3 className="w-4 h-4 text-amber-600" />
@@ -387,13 +387,13 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
 
           <button
             onClick={() => setTab("docentes")}
-            className={`py-3.5 px-2 text-xs sm:text-sm font-bold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
+            className={`py-3.5 px-2 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
               tab === "docentes"
-                ? "border-[#0A2540] text-[#0A2540]"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-[#18181B] text-stone-900"
+                : "border-transparent text-stone-400 hover:text-stone-700"
             }`}
           >
-            <Users className="w-4 h-4 text-slate-600" />
+            <Users className="w-4 h-4 text-stone-500" />
             <span>Plantel Docente ({docentes.length})</span>
           </button>
         </div>
@@ -423,7 +423,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                   setNuevaActiva(true);
                   setShowNuevaModal(true);
                 }}
-                className="py-3 px-5 bg-[#0A2540] hover:bg-[#123358] text-white rounded-2xl text-xs sm:text-sm font-bold shadow-md shadow-slate-900/10 flex items-center gap-2 cursor-pointer self-start sm:self-auto transition"
+                className="py-3 px-5 bg-[#18181B] hover:bg-[#27272A] text-white rounded-2xl text-xs sm:text-sm font-bold shadow-md shadow-slate-900/10 flex items-center gap-2 cursor-pointer self-start sm:self-auto transition"
               >
                 <Plus className="w-4 h-4 text-amber-400" />
                 <span>+ Crear / Habilitar Encuesta</span>
@@ -494,7 +494,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                         <Link
                           href={`/admin/proyectar/${c.codigoAcceso}`}
                           target="_blank"
-                          className="w-full py-3.5 px-4 rounded-2xl bg-[#0A2540] hover:bg-[#123358] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition"
+                          className="w-full py-3.5 px-4 rounded-2xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition"
                         >
                           <QrCode className="w-5 h-5 text-amber-400" />
                           <span>Proyectar Código QR en Pantalla Gigante</span>
@@ -701,7 +701,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                   <button
                     type="submit"
                     disabled={guardandoComision}
-                    className="flex-1 py-3 rounded-xl bg-[#0A2540] hover:bg-[#123358] text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
+                    className="flex-1 py-3 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     {guardandoComision ? (
                       <>
@@ -825,7 +825,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                 <div className="sm:col-span-3">
                   <button
                     type="submit"
-                    className="w-full py-2.5 px-4 bg-[#0A2540] hover:bg-[#123358] text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    className="w-full py-2.5 px-4 bg-[#18181B] hover:bg-[#27272A] text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Plus className="w-4 h-4 text-amber-400" />
                     <span>Guardar Docente</span>

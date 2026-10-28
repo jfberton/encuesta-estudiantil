@@ -20,13 +20,13 @@ export function SwitchButtons({
         disabled={readOnly}
         onClick={() => onChange(true)}
         className={`
-          py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-150 flex items-center justify-center gap-2 select-none
+          py-2 px-4 rounded-xl text-xs sm:text-sm transition-all duration-150 flex items-center justify-center gap-1.5 select-none
           ${
             value === true
-              ? "bg-emerald-600 text-white shadow-md shadow-emerald-200 ring-2 ring-emerald-400"
-              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+              ? "bg-[#18181B] text-white font-semibold border border-[#18181B] shadow-xs"
+              : "bg-white text-stone-700 font-normal border border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
           }
-          ${readOnly ? "cursor-default opacity-90" : "active:scale-95 cursor-pointer"}
+          ${readOnly ? "cursor-default opacity-85" : "active:scale-[0.98] cursor-pointer"}
         `}
       >
         <span>✓</span> Sí
@@ -37,13 +37,13 @@ export function SwitchButtons({
         disabled={readOnly}
         onClick={() => onChange(false)}
         className={`
-          py-2.5 px-4 rounded-xl font-semibold text-sm transition-all duration-150 flex items-center justify-center gap-2 select-none
+          py-2 px-4 rounded-xl text-xs sm:text-sm transition-all duration-150 flex items-center justify-center gap-1.5 select-none
           ${
             value === false
-              ? "bg-rose-600 text-white shadow-md shadow-rose-200 ring-2 ring-rose-400"
-              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+              ? "bg-[#18181B] text-white font-semibold border border-[#18181B] shadow-xs"
+              : "bg-white text-stone-700 font-normal border border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
           }
-          ${readOnly ? "cursor-default opacity-90" : "active:scale-95 cursor-pointer"}
+          ${readOnly ? "cursor-default opacity-85" : "active:scale-[0.98] cursor-pointer"}
         `}
       >
         <span>✕</span> No
