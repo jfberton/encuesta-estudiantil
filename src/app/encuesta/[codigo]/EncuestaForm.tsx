@@ -112,10 +112,11 @@ export function EncuestaForm({
   const agregarDocenteTeoria = () => {
     const yaSeleccionados = new Set(evaluacionesTeoria.map((e) => e.docenteId));
     const siguienteDisponible = docentesTeoria.find((d) => !yaSeleccionados.has(d.id));
+    if (!siguienteDisponible) return;
     setEvaluacionesTeoria([
       ...evaluacionesTeoria,
       {
-        docenteId: siguienteDisponible?.id || docentesTeoria[0]?.id || 0,
+        docenteId: siguienteDisponible.id,
         tipoDocente: "teoria",
         claridadPedagogica: 3,
         disposicionConsultas: 3,
@@ -143,10 +144,11 @@ export function EncuestaForm({
   const agregarDocentePractica = () => {
     const yaSeleccionados = new Set(evaluacionesPractica.map((e) => e.docenteId));
     const siguienteDisponible = docentesPractica.find((d) => !yaSeleccionados.has(d.id));
+    if (!siguienteDisponible) return;
     setEvaluacionesPractica([
       ...evaluacionesPractica,
       {
-        docenteId: siguienteDisponible?.id || docentesPractica[0]?.id || 0,
+        docenteId: siguienteDisponible.id,
         tipoDocente: "practica",
         claridadPedagogica: 3,
         disposicionConsultas: 3,
@@ -393,11 +395,19 @@ export function EncuestaForm({
                     }
                     className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-800 focus:outline-none"
                   >
-                    {docentesTeoria.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.nombre}
-                      </option>
-                    ))}
+                    {docentesTeoria
+                      .filter(
+                        (d) =>
+                          d.id === ev.docenteId ||
+                          !evaluacionesTeoria.some(
+                            (other, oIdx) => oIdx !== idx && other.docenteId === d.id
+                          )
+                      )
+                      .map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.nombre}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
@@ -489,11 +499,19 @@ export function EncuestaForm({
                     }
                     className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-800 focus:outline-none"
                   >
-                    {docentesPractica.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.nombre}
-                      </option>
-                    ))}
+                    {docentesPractica
+                      .filter(
+                        (d) =>
+                          d.id === ev.docenteId ||
+                          !evaluacionesPractica.some(
+                            (other, oIdx) => oIdx !== idx && other.docenteId === d.id
+                          )
+                      )
+                      .map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.nombre}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
