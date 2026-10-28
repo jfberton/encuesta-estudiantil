@@ -41,6 +41,16 @@ export async function POST(
       );
     }
 
+    if (
+      Array.isArray(evaluacionesDocentes) &&
+      evaluacionesDocentes.some((ev: EvaluacionDocenteInput) => !ev.docenteId || ev.docenteId <= 0)
+    ) {
+      return NextResponse.json(
+        { error: "Debe seleccionar un profesor en cada bloque de evaluación docente." },
+        { status: 400 }
+      );
+    }
+
     // 1. Validar que la comisión exista y esté activa
     const [comision] = await db
       .select()

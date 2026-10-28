@@ -50,10 +50,10 @@ export function EncuestaForm({
   const [ajustePrograma, setAjustePrograma] = useState(3);
   const [bibliografiaUtil, setBibliografiaUtil] = useState(3);
 
-  // Evaluaciones de Teoría
+  // Evaluaciones de Teoría (inician sin docente seleccionado para obligar la elección explícita)
   const [evaluacionesTeoria, setEvaluacionesTeoria] = useState<EvaluacionDocenteState[]>([
     {
-      docenteId: docentesTeoria[0]?.id || 0,
+      docenteId: 0,
       tipoDocente: "teoria",
       claridadPedagogica: 3,
       disposicionConsultas: 3,
@@ -61,10 +61,10 @@ export function EncuestaForm({
     },
   ]);
 
-  // Evaluaciones de Práctica
+  // Evaluaciones de Práctica (inician sin docente seleccionado para obligar la elección explícita)
   const [evaluacionesPractica, setEvaluacionesPractica] = useState<EvaluacionDocenteState[]>([
     {
-      docenteId: docentesPractica[0]?.id || 0,
+      docenteId: 0,
       tipoDocente: "practica",
       claridadPedagogica: 3,
       disposicionConsultas: 3,
@@ -110,13 +110,11 @@ export function EncuestaForm({
 
   // Docentes teoría
   const agregarDocenteTeoria = () => {
-    const yaSeleccionados = new Set(evaluacionesTeoria.map((e) => e.docenteId));
-    const siguienteDisponible = docentesTeoria.find((d) => !yaSeleccionados.has(d.id));
-    if (!siguienteDisponible) return;
+    if (evaluacionesTeoria.length >= docentesTeoria.length) return;
     setEvaluacionesTeoria([
       ...evaluacionesTeoria,
       {
-        docenteId: siguienteDisponible.id,
+        docenteId: 0,
         tipoDocente: "teoria",
         claridadPedagogica: 3,
         disposicionConsultas: 3,
@@ -142,13 +140,11 @@ export function EncuestaForm({
 
   // Docentes práctica
   const agregarDocentePractica = () => {
-    const yaSeleccionados = new Set(evaluacionesPractica.map((e) => e.docenteId));
-    const siguienteDisponible = docentesPractica.find((d) => !yaSeleccionados.has(d.id));
-    if (!siguienteDisponible) return;
+    if (evaluacionesPractica.length >= docentesPractica.length) return;
     setEvaluacionesPractica([
       ...evaluacionesPractica,
       {
-        docenteId: siguienteDisponible.id,
+        docenteId: 0,
         tipoDocente: "practica",
         claridadPedagogica: 3,
         disposicionConsultas: 3,
@@ -179,6 +175,18 @@ export function EncuestaForm({
 
     if (!comision.activa) {
       setErrorMessage("La encuesta se encuentra cerrada para esta comisión.");
+      return;
+    }
+
+    // Validar selección explícita de docentes
+    const sinDocenteTeoria = evaluacionesTeoria.some((e) => !e.docenteId || e.docenteId <= 0);
+    const sinDocentePractica = evaluacionesPractica.some((e) => !e.docenteId || e.docenteId <= 0);
+
+    if (sinDocenteTeoria || sinDocentePractica) {
+      setErrorMessage(
+        "Por favor, seleccioná a tu profesor en cada tarjeta de evaluación (Teoría y Práctico) antes de enviar el formulario."
+      );
+      window.scrollTo({ top: 350, behavior: "smooth" });
       return;
     }
 
@@ -389,18 +397,26 @@ export function EncuestaForm({
                   </label>
                   <select
                     disabled={isReadOnly}
-                    value={ev.docenteId}
+                    value={ev.docenteId || ""}
                     onChange={(e) =>
                       actualizarTeoria(idx, "docenteId", Number(e.target.value))
                     }
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-800 focus:outline-none"
+                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none transition ${
+                      ev.docenteId === 0
+                        ? "border-amber-400 text-slate-500 bg-amber-50/20"
+                        : "border-slate-300 text-slate-800"
+                    }`}
                   >
+                    <option value="" disabled>
+                      -- Seleccioná un profesor de Teoría --
+                    </option>
                     {docentesTeoria
                       .filter(
                         (d) =>
                           d.id === ev.docenteId ||
                           !evaluacionesTeoria.some(
-                            (other, oIdx) => oIdx !== idx && other.docenteId === d.id
+                            (other, oIdx) =>
+                              oIdx !== idx && other.docenteId === d.id && other.docenteId > 0
                           )
                       )
                       .map((d) => (
@@ -452,7 +468,8 @@ export function EncuestaForm({
               <button
                 type="button"
                 onClick={agregarDocenteTeoria}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer"
+                disabled={evaluacionesTeoria.some((e) => !e.docenteId || e.docenteId <= 0)}
+                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" /> Agregar otro profesor de Teoría
               </button>
@@ -493,18 +510,26 @@ export function EncuestaForm({
                   </label>
                   <select
                     disabled={isReadOnly}
-                    value={ev.docenteId}
+                    value={ev.docenteId || ""}
                     onChange={(e) =>
                       actualizarPractica(idx, "docenteId", Number(e.target.value))
                     }
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-blue-800 focus:outline-none"
+                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none transition ${
+                      ev.docenteId === 0
+                        ? "border-amber-400 text-slate-500 bg-amber-50/20"
+                        : "border-slate-300 text-slate-800"
+                    }`}
                   >
+                    <option value="" disabled>
+                      -- Seleccioná un profesor de Práctico --
+                    </option>
                     {docentesPractica
                       .filter(
                         (d) =>
                           d.id === ev.docenteId ||
                           !evaluacionesPractica.some(
-                            (other, oIdx) => oIdx !== idx && other.docenteId === d.id
+                            (other, oIdx) =>
+                              oIdx !== idx && other.docenteId === d.id && other.docenteId > 0
                           )
                       )
                       .map((d) => (
@@ -560,7 +585,8 @@ export function EncuestaForm({
               <button
                 type="button"
                 onClick={agregarDocentePractica}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer"
+                disabled={evaluacionesPractica.some((e) => !e.docenteId || e.docenteId <= 0)}
+                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#0A2540]/40 text-[#0A2540] font-semibold text-xs sm:text-sm hover:bg-blue-50/50 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" /> Agregar otro profesor de Práctica
               </button>

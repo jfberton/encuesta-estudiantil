@@ -14,7 +14,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Encuesta de Opinión Estudiantil – Cátedra",
-  description: "Encuesta de opinión anónima para alumnos de la cátedra",
+  description: "Encuesta de opinión anónima para alumnos de la cátedra de Matemática Financiera - Facultad de Ciencias Económicas UNNE",
+  icons: {
+    icon: [
+      { url: "/fce-round.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/fce-round.png",
+    apple: "/fce-round.png",
+  },
 };
 
 export default function RootLayout({
