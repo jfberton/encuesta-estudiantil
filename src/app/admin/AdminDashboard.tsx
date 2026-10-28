@@ -23,6 +23,8 @@ import {
   RefreshCw,
   Radio,
   Clock,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { UnneLogo } from "@/components/UnneLogo";
@@ -88,7 +90,12 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
   const [loadingComisiones, setLoadingComisiones] = useState(true);
   const [showNuevaModal, setShowNuevaModal] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState("");
+  const [nuevaMateria, setNuevaMateria] = useState("Matemática Financiera");
   const [nuevoCiclo, setNuevoCiclo] = useState("2026");
+  const [nuevaActiva, setNuevaActiva] = useState(true);
+  const [guardandoComision, setGuardandoComision] = useState(false);
+  const [comisionAEliminar, setComisionAEliminar] = useState<Comision | null>(null);
+  const [eliminandoComision, setEliminandoComision] = useState(false);
 
   // Estado Docentes
   const [docentes, setDocentes] = useState<Docente[]>([]);
@@ -173,33 +180,65 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
     }
   };
 
-  // Habilitar nueva comisión
-  const handleCrearYActivar = async (e: React.FormEvent) => {
+  // Crear nueva comisión
+  const handleCrearComision = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoNombre.trim()) return;
 
+    setGuardandoComision(true);
     try {
       const res = await fetch("/api/admin/comisiones", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: nuevoNombre.trim(),
-          materia: "Matemática Financiera",
+          materia: nuevaMateria.trim() || "Matemática Financiera",
           cicloLectivo: nuevoCiclo.trim() || "2026",
-          activa: true, // Se habilita automáticamente para responder
+          activa: nuevaActiva,
         }),
       });
 
       if (res.ok) {
         setShowNuevaModal(false);
         setNuevoNombre("");
+        setNuevaMateria("Matemática Financiera");
+        setNuevoCiclo("2026");
+        setNuevaActiva(true);
         await cargarComisiones();
       } else {
         const d = await res.json();
-        alert(d.error || "Error al habilitar la comisión");
+        alert(d.error || "Error al crear la comisión");
       }
     } catch {
       alert("Error al conectar con el servidor");
+    } finally {
+      setGuardandoComision(false);
+    }
+  };
+
+  // Confirmar eliminación de comisión
+  const handleConfirmarEliminarComision = async () => {
+    if (!comisionAEliminar) return;
+    setEliminandoComision(true);
+    try {
+      const res = await fetch(`/api/admin/comisiones/${comisionAEliminar.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        if (selectedComisionId === comisionAEliminar.id) {
+          setSelectedComisionId(null);
+          await cargarStats(null);
+        }
+        setComisionAEliminar(null);
+        await cargarComisiones();
+      } else {
+        const d = await res.json();
+        alert(d.error || "Error al eliminar la comisión");
+      }
+    } catch {
+      alert("Error de conexión al eliminar la comisión");
+    } finally {
+      setEliminandoComision(false);
     }
   };
 
@@ -383,11 +422,17 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
               </div>
 
               <button
-                onClick={() => setShowNuevaModal(true)}
+                onClick={() => {
+                  setNuevoNombre("");
+                  setNuevaMateria("Matemática Financiera");
+                  setNuevoCiclo("2026");
+                  setNuevaActiva(true);
+                  setShowNuevaModal(true);
+                }}
                 className="py-3 px-5 bg-[#0A2540] hover:bg-[#123358] text-white rounded-2xl text-xs sm:text-sm font-bold shadow-md shadow-slate-900/10 flex items-center gap-2 cursor-pointer self-start sm:self-auto transition"
               >
                 <Plus className="w-4 h-4 text-amber-400" />
-                <span>+ Habilitar Nueva Encuesta</span>
+                <span>+ Crear / Habilitar Encuesta</span>
               </button>
             </div>
 
@@ -427,9 +472,19 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                             RECIBIENDO RESPUESTAS
                           </span>
-                          <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
-                            {c.totalRespuestas} {c.totalRespuestas === 1 ? "voto" : "votos"}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
+                              {c.totalRespuestas} {c.totalRespuestas === 1 ? "voto" : "votos"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setComisionAEliminar(c)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                              title="Eliminar encuesta"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
 
                         <h4 className="text-xl font-extrabold text-slate-900 pt-1">
@@ -544,6 +599,15 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                           <BarChart3 className="w-3.5 h-3.5 text-amber-600" />
                           <span>Ver Métricas</span>
                         </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setComisionAEliminar(c)}
+                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                          title="Eliminar encuesta"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -553,15 +617,15 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
           </div>
         )}
 
-        {/* Modal Habilitar Comisión */}
+        {/* Modal Crear / Habilitar Encuesta */}
         {showNuevaModal && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                   <h3 className="font-extrabold text-base text-slate-900">
-                    Habilitar Nueva Encuesta
+                    Crear Nueva Encuesta / Comisión
                   </h3>
                 </div>
                 <button
@@ -572,53 +636,176 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                 </button>
               </div>
 
-              <form onSubmit={handleCrearYActivar} className="space-y-4">
+              <form onSubmit={handleCrearComision} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Nombre de la Comisión / Turno
+                    Nombre de la Comisión / Turno *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="ej: Comisión 1 - Turno Mañana"
+                    placeholder="ej: Comisión 3 - Turno Tarde"
                     value={nuevoNombre}
                     onChange={(e) => setNuevoNombre(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-900 font-semibold focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
                     autoFocus
                   />
-                  <span className="text-[11px] text-slate-500 mt-1 block">
-                    Al confirmar, se abrirá inmediatamente para recibir respuestas de los alumnos.
-                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Materia
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevaMateria}
+                      onChange={(e) => setNuevaMateria(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 p-2.5 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Ciclo Lectivo
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevoCiclo}
+                      onChange={(e) => setNuevoCiclo(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 p-2.5 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Ciclo Lectivo
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Estado Inicial de la Encuesta
                   </label>
-                  <input
-                    type="text"
-                    value={nuevoCiclo}
-                    onChange={(e) => setNuevoCiclo(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 p-2.5 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setNuevaActiva(true)}
+                      className={`p-3 rounded-2xl border text-left cursor-pointer transition ${
+                        nuevaActiva
+                          ? "bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100/70"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                        <span className="text-xs font-bold">Habilitar en vivo</span>
+                      </div>
+                      <p className="text-[11px] leading-tight text-slate-500">
+                        Se abre inmediatamente para proyectar el QR y recibir respuestas.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setNuevaActiva(false)}
+                      className={`p-3 rounded-2xl border text-left cursor-pointer transition ${
+                        !nuevaActiva
+                          ? "bg-blue-50 border-blue-500 text-blue-950 ring-2 ring-blue-500/20"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100/70"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="text-xs font-bold">Crear cerrada</span>
+                      </div>
+                      <p className="text-[11px] leading-tight text-slate-500">
+                        Queda guardada en historial para habilitarla cuando inicie la clase.
+                      </p>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex gap-2.5 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowNuevaModal(false)}
+                    disabled={guardandoComision}
                     className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3 rounded-xl bg-[#0A2540] hover:bg-[#123358] text-white font-bold text-xs shadow-md transition cursor-pointer"
+                    disabled={guardandoComision}
+                    className="flex-1 py-3 rounded-xl bg-[#0A2540] hover:bg-[#123358] text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    Habilitar y Activar Encuesta
+                    {guardandoComision ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Guardando...</span>
+                      </>
+                    ) : (
+                      <span>Crear Encuesta</span>
+                    )}
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Confirmar Eliminar Comisión */}
+        {comisionAEliminar && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-fadeIn">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    ¿Eliminar encuesta?
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Estás a punto de borrar la comisión <strong>{comisionAEliminar.nombre}</strong>.
+                  </p>
+                </div>
+              </div>
+
+              {comisionAEliminar.totalRespuestas > 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-900 flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p>
+                    <strong>¡Atención!</strong> Esta encuesta ya tiene <strong>{comisionAEliminar.totalRespuestas} respuestas</strong> registradas por los alumnos. Al eliminarla, se borrarán todas sus respuestas y evaluaciones asociadas de la base de datos de forma irreversible.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-600">
+                  Esta encuesta no tiene respuestas registradas. Será removida por completo del panel.
+                </div>
+              )}
+
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setComisionAEliminar(null)}
+                  disabled={eliminandoComision}
+                  className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmarEliminarComision}
+                  disabled={eliminandoComision}
+                  className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  {eliminandoComision ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Eliminando...</span>
+                    </>
+                  ) : (
+                    <span>Sí, eliminar</span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
