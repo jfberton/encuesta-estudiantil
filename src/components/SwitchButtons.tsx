@@ -24,7 +24,7 @@ export function SwitchButtons({
           ${
             value === true
               ? "bg-emerald-600 text-white font-bold border-emerald-600 scale-[1.02] shadow-xs"
-              : "bg-emerald-50/30 text-emerald-950/80 border-emerald-200/70 hover:bg-emerald-100/60 hover:border-emerald-300 font-normal"
+              : "bg-white text-stone-700 font-normal border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
           }
           ${readOnly ? "cursor-default opacity-85" : "active:scale-[0.98] cursor-pointer"}
         `}
@@ -41,7 +41,7 @@ export function SwitchButtons({
           ${
             value === false
               ? "bg-rose-500 text-white font-bold border-rose-500 scale-[1.02] shadow-xs"
-              : "bg-rose-50/30 text-rose-950/80 border-rose-200/70 hover:bg-rose-100/60 hover:border-rose-300 font-normal"
+              : "bg-white text-stone-700 font-normal border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
           }
           ${readOnly ? "cursor-default opacity-85" : "active:scale-[0.98] cursor-pointer"}
         `}
