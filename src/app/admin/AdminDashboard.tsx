@@ -90,8 +90,6 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
   const [loadingComisiones, setLoadingComisiones] = useState(true);
   const [showNuevaModal, setShowNuevaModal] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState("");
-  const [nuevaMateria, setNuevaMateria] = useState("Matemática Financiera");
-  const [nuevoCiclo, setNuevoCiclo] = useState("2026");
   const [nuevaActiva, setNuevaActiva] = useState(true);
   const [guardandoComision, setGuardandoComision] = useState(false);
   const [comisionAEliminar, setComisionAEliminar] = useState<Comision | null>(null);
@@ -192,8 +190,8 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: nuevoNombre.trim(),
-          materia: nuevaMateria.trim() || "Matemática Financiera",
-          cicloLectivo: nuevoCiclo.trim() || "2026",
+          materia: "Matemática Financiera",
+          cicloLectivo: "2026",
           activa: nuevaActiva,
         }),
       });
@@ -201,8 +199,6 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
       if (res.ok) {
         setShowNuevaModal(false);
         setNuevoNombre("");
-        setNuevaMateria("Matemática Financiera");
-        setNuevoCiclo("2026");
         setNuevaActiva(true);
         await cargarComisiones();
       } else {
@@ -424,8 +420,6 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
               <button
                 onClick={() => {
                   setNuevoNombre("");
-                  setNuevaMateria("Matemática Financiera");
-                  setNuevoCiclo("2026");
                   setNuevaActiva(true);
                   setShowNuevaModal(true);
                 }}
@@ -650,32 +644,6 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                     className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-900 font-semibold focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
                     autoFocus
                   />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Materia
-                    </label>
-                    <input
-                      type="text"
-                      value={nuevaMateria}
-                      onChange={(e) => setNuevaMateria(e.target.value)}
-                      className="w-full rounded-xl border border-slate-300 p-2.5 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Ciclo Lectivo
-                    </label>
-                    <input
-                      type="text"
-                      value={nuevoCiclo}
-                      onChange={(e) => setNuevoCiclo(e.target.value)}
-                      className="w-full rounded-xl border border-slate-300 p-2.5 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
-                    />
-                  </div>
                 </div>
 
                 <div>
