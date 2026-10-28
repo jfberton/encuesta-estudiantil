@@ -17,11 +17,11 @@ export const metadata: Metadata = {
   description: "Encuesta de opinión anónima para alumnos de la cátedra de Matemática Financiera - Facultad de Ciencias Económicas UNNE",
   icons: {
     icon: [
-      { url: "/fce-round.png", sizes: "192x192", type: "image/png" },
-      { url: "/favicon.ico" },
+      { url: "/fce-round.png?v=2", sizes: "192x192", type: "image/png" },
+      { url: "/favicon.ico?v=2" },
     ],
-    shortcut: "/fce-round.png",
-    apple: "/fce-round.png",
+    shortcut: "/fce-round.png?v=2",
+    apple: "/fce-round.png?v=2",
   },
 };
 
