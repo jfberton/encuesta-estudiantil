@@ -713,8 +713,8 @@ export function EncuestaForm({
           </div>
         </section>
 
-        {/* Botón de Enviar */}
-        <div className="sticky bottom-4 pt-2">
+        {/* Botón de Enviar (al final del formulario, sin flotar en pantalla) */}
+        <div className="pt-4 pb-10">
           {isReadOnly ? (
             <div className="bg-[#0A2540] text-white p-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-semibold text-sm border border-amber-400/40">
               <Lock className="w-4 h-4 text-amber-400" /> Respuestas registradas - Modo revisión
