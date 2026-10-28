@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Encuesta de Opinión Estudiantil – Cátedra Universitaria
 
-## Getting Started
+Sistema web moderno, responsivo y anónimo para la evaluación estudiantil del desempeño docente y contenidos de la cátedra mediante códigos QR en clase.
 
-First, run the development server:
+## 🚀 Tecnologías
+- **Framework:** Next.js (App Router) + TypeScript + Tailwind CSS
+- **Base de Datos:** Neon Serverless PostgreSQL
+- **ORM:** Drizzle ORM
+- **Autenticación Docente:** JWT seguro con cookies HTTP-Only (Jose)
+- **Generación de QR:** Integrada para proyección en clase y descarga PNG
+- **Exportación:** Descarga directa de respuestas consolidadas en formato Excel / CSV
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 💻 Ejecución Local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Instalar dependencias (ya instaladas):
+   ```bash
+   npm install
+   ```
+2. Las variables de entorno ya están configuradas en `.env.local`.
+3. Iniciar el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+4. Abrir en el navegador:
+   - **Inicio / Comisiones activas:** [http://localhost:3000](http://localhost:3000)
+   - **Panel de Administración:** [http://localhost:3000/admin](http://localhost:3000/admin)
+   - **Encuesta de prueba:** [http://localhost:3000/encuesta/comision-1](http://localhost:3000/encuesta/comision-1)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔑 Credenciales Iniciales de Administración
+- **Usuario:** `admin`
+- **Contraseña:** `admin_catedra_2026`
 
-To learn more about Next.js, take a look at the following resources:
+*(Podés cambiarla o crear más administradores desde la base de datos o variables de entorno).*
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛡️ Mecanismo de Anonimato y Prevención de Reenvíos
+1. **LocalStorage en el dispositivo:** Al presionar *Guardar y Enviar*, el formulario se bloquea y guarda una copia local. Si el estudiante vuelve a escanear el QR o refresca la página, accede directamente a sus respuestas en **Modo Sólo Lectura**.
+2. **Fingerprint Anónimo:** El backend valida una huella digital técnica del dispositivo única por comisión, impidiendo que el mismo teléfono envíe dos respuestas incluso usando modo incógnito.
+3. **Control en Vivo por Comisión:** El docente abre la encuesta durante la clase con un interruptor (`Habilitada / Cerrada`) y la cierra al finalizar el horario estipulado.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ☁️ Despliegue en Cloudflare Pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Subir este repositorio a **GitHub**.
+2. En [Cloudflare Dashboard](https://dash.cloudflare.com/) ir a **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
+3. Seleccionar el repositorio.
+4. Configuración de Build:
+   - **Framework preset:** `Next.js`
+   - **Build command:** `npx @cloudflare/next-on-pages` (o `npm run build`)
+   - **Build output directory:** `.vercel/output/static` (o `.next`)
+5. En **Environment variables**, agregar:
+   - `DATABASE_URL`: tu cadena de conexión de Neon
+   - `JWT_SECRET`: una clave secreta para los tokens de sesión del admin
+   - `ADMIN_DEFAULT_PASSWORD`: contraseña del admin
+6. ¡Listo! Cloudflare compilará y desplegará automáticamente con cada `git push`.
