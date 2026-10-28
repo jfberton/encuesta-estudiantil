@@ -49,6 +49,6 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Error desconocido";
     console.error("Error en login:", errorMessage);
-    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -10,5 +10,10 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "vars": {
+    "DATABASE_URL": "postgresql://neondb_owner:npg_2m7rYGitHQLc@ep-aged-mountain-b5h3db2g-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require",
+    "JWT_SECRET": "c4t3dr4-encuest4-s3cr3t-k3y-2026-neon-auth-token-super-safe",
+    "ADMIN_DEFAULT_PASSWORD": "admin_catedra_2026"
   }
 }
