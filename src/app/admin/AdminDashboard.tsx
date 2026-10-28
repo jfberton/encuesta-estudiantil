@@ -336,7 +336,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
       {/* Barra Superior Institucional */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <UnneLogo className="h-10 sm:h-12 w-auto" subtitulo="Panel de Gestión de Encuestas" />
+          <UnneLogo className="h-10 sm:h-11 w-auto" subtitulo="Cátedra: Matemática Financiera" />
 
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-block text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">

@@ -52,7 +52,7 @@ export default async function ProyectarPage({ params }: PageProps) {
         >
           <ArrowLeft className="w-4 h-4 text-amber-600" /> Volver al Panel Docente
         </Link>
-        <UnneLogo className="h-10 w-auto" subtitulo="Cátedra Matemática Financiera" />
+        <UnneLogo className="h-10 w-auto" subtitulo="Cátedra: Matemática Financiera" />
       </div>
 
       {/* Contenido Central para Proyectar */}

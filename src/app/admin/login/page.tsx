@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
       <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-xl space-y-6">
         {/* Logo Institucional Oficial */}
         <div className="flex justify-center pb-2">
-          <UnneLogo className="h-14 sm:h-16 w-auto" subtitulo="Cátedra Matemática Financiera" />
+          <UnneLogo className="h-11 sm:h-12 w-auto" subtitulo="Cátedra: Matemática Financiera" />
         </div>
 
         <div className="text-center space-y-1 border-t border-slate-100 pt-5">

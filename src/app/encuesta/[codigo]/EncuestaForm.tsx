@@ -257,9 +257,6 @@ export function EncuestaForm({
         </div>
 
         <div className="space-y-1">
-          <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">
-            Cátedra de Matemática Financiera
-          </span>
           <h1 className="text-xl sm:text-2xl font-extrabold text-[#0A2540] tracking-tight">
             Encuesta de Opinión Estudiantil
           </h1>
