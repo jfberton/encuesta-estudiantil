@@ -7,16 +7,28 @@ import { ShieldCheck, ArrowRight, Lock } from "lucide-react";
 import { UnneLogo } from "@/components/UnneLogo";
 
 export default async function HomePage() {
-  const comisionesActivas = await db
-    .select({
-      id: comisiones.id,
-      nombre: comisiones.nombre,
-      materia: comisiones.materia,
-      codigoAcceso: comisiones.codigoAcceso,
-      cicloLectivo: comisiones.cicloLectivo,
-    })
-    .from(comisiones)
-    .where(eq(comisiones.activa, true));
+  let comisionesActivas: Array<{
+    id: number;
+    nombre: string;
+    materia: string;
+    codigoAcceso: string;
+    cicloLectivo: string;
+  }> = [];
+
+  try {
+    comisionesActivas = await db
+      .select({
+        id: comisiones.id,
+        nombre: comisiones.nombre,
+        materia: comisiones.materia,
+        codigoAcceso: comisiones.codigoAcceso,
+        cicloLectivo: comisiones.cicloLectivo,
+      })
+      .from(comisiones)
+      .where(eq(comisiones.activa, true));
+  } catch (err) {
+    console.error("Error al consultar comisiones activas:", err);
+  }
 
   return (
     <main className="min-h-screen bg-[#071728] text-white flex flex-col justify-between p-6 sm:p-12 relative overflow-hidden">
