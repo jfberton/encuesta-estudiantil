@@ -2,20 +2,32 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-function getDatabaseUrl() {
-  const url = process.env.DATABASE_URL;
-  if (!url) {
-    console.error("CRITICAL: DATABASE_URL no está definida en process.env");
-    return "";
+export function getDatabaseUrl(): string {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
   }
-  return url;
+
+  try {
+    // Soporte para Cloudflare Workers con OpenNext
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCloudflareContext } = require("@opennextjs/cloudflare");
+    const ctx = getCloudflareContext({ async: false });
+    if (ctx?.env?.DATABASE_URL) {
+      return ctx.env.DATABASE_URL as string;
+    }
+  } catch {
+    // Contexto local o fallback
+  }
+
+  console.error("CRITICAL: DATABASE_URL no encontrada en process.env ni en CloudflareContext");
+  return "";
 }
 
 let _dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 export function getDb() {
-  if (!_dbInstance) {
-    const url = getDatabaseUrl();
+  const url = getDatabaseUrl();
+  if (!_dbInstance || !_dbInstance._) {
     const sql = neon(url);
     _dbInstance = drizzle(sql, { schema });
   }
@@ -25,7 +37,7 @@ export function getDb() {
 export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
   get(_target, prop) {
     const instance = getDb();
-    // @ts-expect-error proxy forward
+    // @ts-expect-error proxy access
     return instance[prop];
   },
 });
