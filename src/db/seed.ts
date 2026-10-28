@@ -56,13 +56,21 @@ async function seed() {
   const existingDocentes = await db.select().from(schema.docentes);
   if (existingDocentes.length === 0) {
     await db.insert(schema.docentes).values([
-      { nombre: "Prof. Alberto Gómez (Teoría)", rol: "teoria", activo: true },
-      { nombre: "Prof. María Fernández (Teoría)", rol: "teoria", activo: true },
-      { nombre: "Ing. Carlos López (Práctica)", rol: "practica", activo: true },
-      { nombre: "Lic. Laura Rossi (Práctica)", rol: "practica", activo: true },
-      { nombre: "Dr. Roberto Díaz (Teoría y Práctica)", rol: "ambos", activo: true },
+      { nombre: "Berta Rott", rol: "teoria", activo: true },
+      { nombre: "Ana María Nuñez", rol: "teoria", activo: true },
+      { nombre: "María del Carmen Bermúdez", rol: "teoria", activo: true },
+      { nombre: "Daniel Quain", rol: "practica", activo: true },
+      { nombre: "Ariel Vargas", rol: "practica", activo: true },
+      { nombre: "María Nidia Berger", rol: "practica", activo: true },
+      { nombre: "Nicolás Custidiano", rol: "practica", activo: true },
+      { nombre: "Rodriguez", rol: "practica", activo: true },
+      { nombre: "Rodrigo Belbey", rol: "practica", activo: true },
+      { nombre: "Silvina Trullet", rol: "practica", activo: true },
+      { nombre: "Guillermo Andreatta", rol: "practica", activo: true },
+      { nombre: "Lucas Ochipinti", rol: "practica", activo: true },
+      { nombre: "Martín Pérez Zamparo", rol: "practica", activo: true },
     ]);
-    console.log("✅ Docentes de prueba creados.");
+    console.log("✅ Docentes oficiales cargados.");
   } else {
     console.log("ℹ️ Docentes ya existen.");
   }
