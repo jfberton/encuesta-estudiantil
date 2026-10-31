@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { db } from "@/db";
 import { comisiones } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -32,8 +33,22 @@ export default async function ProyectarPage({ params }: PageProps) {
     notFound();
   }
 
-  const surveyUrl = `/encuesta/${comision.codigoAcceso}`;
-  const qrSvg = await QRCode.toString(surveyUrl, {
+  // Obtener host y protocolo dinámicamente para construir la URL absoluta completa (necesaria para que el lector de cámara del celular abra el enlace)
+  const headersList = await headers();
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
+
+  let fullSurveyUrl = "";
+  if (envUrl) {
+    fullSurveyUrl = `${envUrl.replace(/\/$/, "")}/encuesta/${comision.codigoAcceso}`;
+  } else {
+    const host = headersList.get("x-forwarded-host") || headersList.get("host") || "localhost:3000";
+    const proto =
+      headersList.get("x-forwarded-proto") ||
+      (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
+    fullSurveyUrl = `${proto}://${host}/encuesta/${comision.codigoAcceso}`;
+  }
+
+  const qrSvg = await QRCode.toString(fullSurveyUrl, {
     type: "svg",
     width: 320,
     margin: 1,
@@ -98,9 +113,9 @@ export default async function ProyectarPage({ params }: PageProps) {
             Escaneá con la cámara de tu celular para responder la encuesta
           </p>
           <div className="inline-flex items-center gap-2 text-xs text-slate-600 font-mono bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs max-w-full truncate print:border-slate-400">
-            <span className="truncate">/encuesta/{comision.codigoAcceso}</span>
+            <span className="truncate">{fullSurveyUrl}</span>
             <Link
-              href={`/encuesta/${comision.codigoAcceso}`}
+              href={fullSurveyUrl}
               target="_blank"
               className="text-[#0A2540] hover:text-blue-800 print:hidden shrink-0"
               title="Abrir encuesta"
