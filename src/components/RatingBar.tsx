@@ -3,7 +3,7 @@
 import React from "react";
 
 interface RatingBarProps {
-  value: number;
+  value: number | null | undefined;
   onChange: (val: number) => void;
   readOnly?: boolean;
   labelMin?: string;
@@ -44,7 +44,7 @@ export function RatingBar({
     <div className="w-full space-y-1.5">
       <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
         {options.map((num) => {
-          const isSelected = value === num;
+          const isSelected = value !== null && value !== undefined && value === num;
           return (
             <button
               key={num}

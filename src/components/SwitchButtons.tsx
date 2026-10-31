@@ -3,7 +3,7 @@
 import React from "react";
 
 interface SwitchButtonsProps {
-  value: boolean;
+  value: boolean | null | undefined;
   onChange: (val: boolean) => void;
   readOnly?: boolean;
 }
@@ -13,6 +13,9 @@ export function SwitchButtons({
   onChange,
   readOnly = false,
 }: SwitchButtonsProps) {
+  const isYes = value === true;
+  const isNo = value === false;
+
   return (
     <div className="grid grid-cols-2 gap-2.5 w-full max-w-xs">
       <button
@@ -22,7 +25,7 @@ export function SwitchButtons({
         className={`
           py-2 px-4 rounded-xl text-xs sm:text-sm border transition-all duration-150 flex items-center justify-center gap-1.5 select-none
           ${
-            value === true
+            isYes
               ? "bg-emerald-600 text-white font-bold border-emerald-600 scale-[1.02] shadow-xs"
               : "bg-white text-stone-700 font-normal border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
           }
@@ -39,7 +42,7 @@ export function SwitchButtons({
         className={`
           py-2 px-4 rounded-xl text-xs sm:text-sm border transition-all duration-150 flex items-center justify-center gap-1.5 select-none
           ${
-            value === false
+            isNo
               ? "bg-rose-500 text-white font-bold border-rose-500 scale-[1.02] shadow-xs"
               : "bg-white text-stone-700 font-normal border-stone-200/90 hover:border-stone-400 hover:bg-stone-50/70"
           }

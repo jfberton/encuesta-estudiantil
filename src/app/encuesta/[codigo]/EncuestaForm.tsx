@@ -16,9 +16,10 @@ interface DocenteItem {
 interface EvaluacionDocenteState {
   docenteId: number;
   tipoDocente: "teoria" | "practica";
-  claridadPedagogica: number;
-  disposicionConsultas: number;
-  puntualidadCumplimiento: number;
+  claridadPedagogica: number | null;
+  disposicionConsultas: number | null;
+  puntualidadCumplimiento: number | null;
+  articulacionTeoriaPractica?: number | null;
 }
 
 interface EncuestaFormProps {
@@ -46,58 +47,57 @@ export function EncuestaForm({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Estados del Formulario
-  const [ajustePrograma, setAjustePrograma] = useState(3);
-  const [bibliografiaUtil, setBibliografiaUtil] = useState(3);
+  // Estados del Formulario (inician sin nada preseleccionado: null)
+  const [ajustePrograma, setAjustePrograma] = useState<number | null>(null);
+  const [bibliografiaUtil, setBibliografiaUtil] = useState<number | null>(null);
 
-  // Evaluaciones de Teoría (inician sin docente seleccionado para obligar la elección explícita)
+  // Evaluaciones de Teoría
   const [evaluacionesTeoria, setEvaluacionesTeoria] = useState<EvaluacionDocenteState[]>([
     {
       docenteId: 0,
       tipoDocente: "teoria",
-      claridadPedagogica: 3,
-      disposicionConsultas: 3,
-      puntualidadCumplimiento: 3,
+      claridadPedagogica: null,
+      disposicionConsultas: null,
+      puntualidadCumplimiento: null,
     },
   ]);
 
-  // Evaluaciones de Práctica (inician sin docente seleccionado para obligar la elección explícita)
+  // Evaluaciones de Práctica (incluye articulación teoría-práctica)
   const [evaluacionesPractica, setEvaluacionesPractica] = useState<EvaluacionDocenteState[]>([
     {
       docenteId: 0,
       tipoDocente: "practica",
-      claridadPedagogica: 3,
-      disposicionConsultas: 3,
-      puntualidadCumplimiento: 3,
+      claridadPedagogica: null,
+      disposicionConsultas: null,
+      puntualidadCumplimiento: null,
+      articulacionTeoriaPractica: null,
     },
   ]);
 
-  const [articulacionTeoriaPractica, setArticulacionTeoriaPractica] = useState(3);
-  const [coherenciaExamenes, setCoherenciaExamenes] = useState(3);
-  const [practicoParcialesPrevios, setPracticoParcialesPrevios] = useState(false);
-  const [recursante, setRecursante] = useState(false);
-  const [conocimientosPrevios, setConocimientosPrevios] = useState(true);
+  const [coherenciaExamenes, setCoherenciaExamenes] = useState<number | null>(null);
+  const [practicoParcialesPrevios, setPracticoParcialesPrevios] = useState<boolean | null>(null);
+  const [recursante, setRecursante] = useState<boolean | null>(null);
+  const [conocimientosPrevios, setConocimientosPrevios] = useState<boolean | null>(null);
 
   // Preguntas Abiertas
   const [puntosPositivos, setPuntosPositivos] = useState("");
   const [aspectosAMejorar, setAspectosAMejorar] = useState("");
   const [comentariosAdicionales, setComentariosAdicionales] = useState("");
 
-  // Cargar si ya respondió
+  // Cargar si ya respondió previamente desde este dispositivo
   useEffect(() => {
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         const data = JSON.parse(stored);
-        setAjustePrograma(data.ajustePrograma ?? 3);
-        setBibliografiaUtil(data.bibliografiaUtil ?? 3);
+        setAjustePrograma(data.ajustePrograma ?? null);
+        setBibliografiaUtil(data.bibliografiaUtil ?? null);
         if (data.evaluacionesTeoria) setEvaluacionesTeoria(data.evaluacionesTeoria);
         if (data.evaluacionesPractica) setEvaluacionesPractica(data.evaluacionesPractica);
-        setArticulacionTeoriaPractica(data.articulacionTeoriaPractica ?? 3);
-        setCoherenciaExamenes(data.coherenciaExamenes ?? 3);
-        setPracticoParcialesPrevios(data.practicoParcialesPrevios ?? false);
-        setRecursante(data.recursante ?? false);
-        setConocimientosPrevios(data.conocimientosPrevios ?? true);
+        setCoherenciaExamenes(data.coherenciaExamenes ?? null);
+        setPracticoParcialesPrevios(data.practicoParcialesPrevios ?? null);
+        setRecursante(data.recursante ?? null);
+        setConocimientosPrevios(data.conocimientosPrevios ?? null);
         setPuntosPositivos(data.puntosPositivos ?? "");
         setAspectosAMejorar(data.aspectosAMejorar ?? "");
         setComentariosAdicionales(data.comentariosAdicionales ?? "");
@@ -116,9 +116,9 @@ export function EncuestaForm({
       {
         docenteId: 0,
         tipoDocente: "teoria",
-        claridadPedagogica: 3,
-        disposicionConsultas: 3,
-        puntualidadCumplimiento: 3,
+        claridadPedagogica: null,
+        disposicionConsultas: null,
+        puntualidadCumplimiento: null,
       },
     ]);
   };
@@ -131,7 +131,7 @@ export function EncuestaForm({
   const actualizarTeoria = (
     index: number,
     field: keyof EvaluacionDocenteState,
-    value: number
+    value: number | null
   ) => {
     const copy = [...evaluacionesTeoria];
     copy[index] = { ...copy[index], [field]: value };
@@ -146,9 +146,10 @@ export function EncuestaForm({
       {
         docenteId: 0,
         tipoDocente: "practica",
-        claridadPedagogica: 3,
-        disposicionConsultas: 3,
-        puntualidadCumplimiento: 3,
+        claridadPedagogica: null,
+        disposicionConsultas: null,
+        puntualidadCumplimiento: null,
+        articulacionTeoriaPractica: null,
       },
     ]);
   };
@@ -161,7 +162,7 @@ export function EncuestaForm({
   const actualizarPractica = (
     index: number,
     field: keyof EvaluacionDocenteState,
-    value: number
+    value: number | null
   ) => {
     const copy = [...evaluacionesPractica];
     copy[index] = { ...copy[index], [field]: value };
@@ -178,15 +179,63 @@ export function EncuestaForm({
       return;
     }
 
-    // Validar selección explícita de docentes
-    const sinDocenteTeoria = evaluacionesTeoria.some((e) => !e.docenteId || e.docenteId <= 0);
-    const sinDocentePractica = evaluacionesPractica.some((e) => !e.docenteId || e.docenteId <= 0);
+    // 1. Validar selección de docentes
+    const sinDocenteTeoria = evaluacionesTeoria.some((ev) => !ev.docenteId || ev.docenteId <= 0);
+    const sinDocentePractica = evaluacionesPractica.some((ev) => !ev.docenteId || ev.docenteId <= 0);
 
     if (sinDocenteTeoria || sinDocentePractica) {
       setErrorMessage(
         "Por favor, seleccioná a tu profesor en cada tarjeta de evaluación (Teoría y Práctico) antes de enviar el formulario."
       );
       window.scrollTo({ top: 350, behavior: "smooth" });
+      return;
+    }
+
+    // 2. Validar que no haya preguntas obligatorias sin responder
+    if (ajustePrograma === null || bibliografiaUtil === null) {
+      setErrorMessage("Por favor, calificá los contenidos y la bibliografía en la Sección 1.");
+      window.scrollTo({ top: 250, behavior: "smooth" });
+      return;
+    }
+
+    const faltaTeoria = evaluacionesTeoria.some(
+      (ev) =>
+        ev.claridadPedagogica === null ||
+        ev.disposicionConsultas === null ||
+        ev.puntualidadCumplimiento === null
+    );
+    if (faltaTeoria) {
+      setErrorMessage("Por favor, calificá todos los aspectos del profesor de Teoría.");
+      window.scrollTo({ top: 400, behavior: "smooth" });
+      return;
+    }
+
+    const faltaPractica = evaluacionesPractica.some(
+      (ev) =>
+        ev.claridadPedagogica === null ||
+        ev.disposicionConsultas === null ||
+        ev.puntualidadCumplimiento === null ||
+        ev.articulacionTeoriaPractica === null
+    );
+    if (faltaPractica) {
+      setErrorMessage(
+        "Por favor, calificá todos los aspectos del profesor de Práctica (incluyendo la Articulación Teoría-Práctica)."
+      );
+      window.scrollTo({ top: 550, behavior: "smooth" });
+      return;
+    }
+
+    if (coherenciaExamenes === null) {
+      setErrorMessage("Por favor, calificá la coherencia de las evaluaciones en la Sección 3.");
+      return;
+    }
+
+    if (
+      practicoParcialesPrevios === null ||
+      recursante === null ||
+      conocimientosPrevios === null
+    ) {
+      setErrorMessage("Por favor, respondé todas las preguntas de Sí/No en la Sección 3.");
       return;
     }
 
@@ -203,7 +252,6 @@ export function EncuestaForm({
         ajustePrograma,
         bibliografiaUtil,
         coherenciaExamenes,
-        articulacionTeoriaPractica,
         puntosPositivos,
         aspectosAMejorar,
         comentariosAdicionales,
@@ -325,15 +373,11 @@ export function EncuestaForm({
             </p>
           </div>
 
-          <div className="space-y-2">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Ajuste al programa de la materia
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                Los contenidos dictados se ajustaron al programa oficial de la cátedra.
-              </p>
-            </div>
+          {/* Pregunta 1: Ajuste al programa */}
+          <div className="space-y-3">
+            <p className="text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              Los contenidos dictados se ajustaron al programa oficial de la cátedra.
+            </p>
             <RatingBar
               value={ajustePrograma}
               onChange={setAjustePrograma}
@@ -341,15 +385,11 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Bibliografía y material de estudio
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                La bibliografía y el material de estudio estuvieron accesibles y fueron útiles para el aprendizaje.
-              </p>
-            </div>
+          {/* Pregunta 2: Bibliografía */}
+          <div className="space-y-3 pt-5 border-t border-stone-100">
+            <p className="text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              La bibliografía y el material de estudio estuvieron accesibles y fueron útiles para el aprendizaje.
+            </p>
             <RatingBar
               value={bibliografiaUtil}
               onChange={setBibliografiaUtil}
@@ -437,15 +477,10 @@ export function EncuestaForm({
                 </div>
 
                 {/* Pregunta 1: Claridad pedagógica */}
-                <div className="space-y-2 pt-3 border-t border-stone-200/60">
-                  <div>
-                    <h5 className="text-xs font-semibold text-stone-900">
-                      Claridad pedagógica:
-                    </h5>
-                    <p className="text-xs text-stone-500 font-normal mt-0.5">
-                      El docente explicó los temas de forma clara y accesible.
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    El docente explicó los temas de forma clara y comprensible.
+                  </p>
                   <RatingBar
                     value={ev.claridadPedagogica}
                     onChange={(val) => actualizarTeoria(idx, "claridadPedagogica", val)}
@@ -454,15 +489,10 @@ export function EncuestaForm({
                 </div>
 
                 {/* Pregunta 2: Disposición a consultas */}
-                <div className="space-y-2 pt-3 border-t border-stone-200/60">
-                  <div>
-                    <h5 className="text-xs font-semibold text-stone-900">
-                      Disposición a consultas:
-                    </h5>
-                    <p className="text-xs text-stone-500 font-normal mt-0.5">
-                      Mostró apertura para resolver dudas durante las clases o con posterioridad a ellas.
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    Mostró apertura y buena disposición para resolver dudas durante o después de clase.
+                  </p>
                   <RatingBar
                     value={ev.disposicionConsultas}
                     onChange={(val) => actualizarTeoria(idx, "disposicionConsultas", val)}
@@ -471,15 +501,10 @@ export function EncuestaForm({
                 </div>
 
                 {/* Pregunta 3: Puntualidad y cumplimiento */}
-                <div className="space-y-2 pt-3 border-t border-stone-200/60">
-                  <div>
-                    <h5 className="text-xs font-semibold text-stone-900">
-                      Puntualidad y cumplimiento:
-                    </h5>
-                    <p className="text-xs text-stone-500 font-normal mt-0.5">
-                      Cumplió con los horarios y el cronograma pautado.
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    Cumplió con los horarios pautados y el cronograma de clases.
+                  </p>
                   <RatingBar
                     value={ev.puntualidadCumplimiento}
                     onChange={(val) =>
@@ -568,15 +593,10 @@ export function EncuestaForm({
                 </div>
 
                 {/* Pregunta 1: Claridad pedagógica */}
-                <div className="space-y-2 pt-3 border-t border-stone-200/60">
-                  <div>
-                    <h5 className="text-xs font-semibold text-stone-900">
-                      Claridad pedagógica:
-                    </h5>
-                    <p className="text-xs text-stone-500 font-normal mt-0.5">
-                      El docente explicó los temas de forma clara y accesible.
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    El docente explicó los temas prácticos de forma clara y comprensible.
+                  </p>
                   <RatingBar
                     value={ev.claridadPedagogica}
                     onChange={(val) =>
@@ -587,15 +607,10 @@ export function EncuestaForm({
                 </div>
 
                 {/* Pregunta 2: Disposición a consultas */}
-                <div className="space-y-2 pt-3 border-t border-stone-200/60">
-                  <div>
-                    <h5 className="text-xs font-semibold text-stone-900">
-                      Disposición a consultas:
-                    </h5>
-                    <p className="text-xs text-stone-500 font-normal mt-0.5">
-                      Mostró apertura para resolver dudas durante las clases o con posterioridad a ellas.
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    Mostró apertura y buena disposición para resolver dudas durante o después de clase.
+                  </p>
                   <RatingBar
                     value={ev.disposicionConsultas}
                     onChange={(val) =>
@@ -606,19 +621,28 @@ export function EncuestaForm({
                 </div>
 
                 {/* Pregunta 3: Puntualidad y cumplimiento */}
-                <div className="space-y-2 pt-3 border-t border-stone-200/60">
-                  <div>
-                    <h5 className="text-xs font-semibold text-stone-900">
-                      Puntualidad y cumplimiento:
-                    </h5>
-                    <p className="text-xs text-stone-500 font-normal mt-0.5">
-                      Cumplió con los horarios y el cronograma pautado.
-                    </p>
-                  </div>
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    Cumplió con los horarios pautados y el cronograma de clases.
+                  </p>
                   <RatingBar
                     value={ev.puntualidadCumplimiento}
                     onChange={(val) =>
                       actualizarPractica(idx, "puntualidadCumplimiento", val)
+                    }
+                    readOnly={isReadOnly}
+                  />
+                </div>
+
+                {/* Pregunta 4: Articulación teoría-práctica (específico de profesores de práctica) */}
+                <div className="space-y-3 pt-3 border-t border-stone-200/60">
+                  <p className="text-xs sm:text-sm font-semibold text-stone-800 leading-snug">
+                    Las actividades prácticas y trabajos ayudaron a fijar y articular los conceptos teóricos.
+                  </p>
+                  <RatingBar
+                    value={ev.articulacionTeoriaPractica ?? null}
+                    onChange={(val) =>
+                      actualizarPractica(idx, "articulacionTeoriaPractica", val)
                     }
                     readOnly={isReadOnly}
                   />
@@ -637,23 +661,6 @@ export function EncuestaForm({
               </button>
             )}
           </div>
-
-          {/* ARTICULACIÓN TEORÍA-PRÁCTICA */}
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Articulación teoría-práctica:
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                Las actividades prácticas y trabajos ayudaron a fijar los conceptos teóricos.
-              </p>
-            </div>
-            <RatingBar
-              value={articulacionTeoriaPractica}
-              onChange={setArticulacionTeoriaPractica}
-              readOnly={isReadOnly}
-            />
-          </div>
         </section>
 
         {/* SECCIÓN 3: Evaluaciones y Perfil */}
@@ -663,19 +670,14 @@ export function EncuestaForm({
               3. Evaluaciones y Situación Académica
             </span>
             <h2 className="text-lg font-bold text-stone-900 tracking-tight mt-0.5">
-              Evaluaciones y Devoluciones
+              Evaluaciones y Situación Académica
             </h2>
           </div>
 
-          <div className="space-y-2">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Coherencia de las evaluaciones
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                Los exámenes/parciales guardaron coherencia con lo enseñado en clase. (Escala 1 al 5)
-              </p>
-            </div>
+          <div className="space-y-3">
+            <p className="text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              Los exámenes parciales guardaron coherencia con lo enseñado en clase y en las guías de trabajos prácticos.
+            </p>
             <RatingBar
               value={coherenciaExamenes}
               onChange={setCoherenciaExamenes}
@@ -683,15 +685,10 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Práctica con exámenes previos
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                ¿Practicaste con ejemplos de parciales previos?
-              </p>
-            </div>
+          <div className="space-y-3 pt-5 border-t border-stone-100">
+            <p className="text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              ¿Practicaste con ejemplos de exámenes parciales de años anteriores?
+            </p>
             <SwitchButtons
               value={practicoParcialesPrevios}
               onChange={setPracticoParcialesPrevios}
@@ -699,15 +696,10 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Condición de recursante
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                ¿Sos recursante de Matemática Financiera?
-              </p>
-            </div>
+          <div className="space-y-3 pt-5 border-t border-stone-100">
+            <p className="text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              ¿Sos recursante de Matemática Financiera?
+            </p>
             <SwitchButtons
               value={recursante}
               onChange={setRecursante}
@@ -715,15 +707,10 @@ export function EncuestaForm({
             />
           </div>
 
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Conocimientos previos
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                ¿Considerás que tenés los conocimientos previos necesarios para cursar la materia?
-              </p>
-            </div>
+          <div className="space-y-3 pt-5 border-t border-stone-100">
+            <p className="text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              ¿Considerás que tenés los conocimientos previos necesarios para cursar la materia?
+            </p>
             <SwitchButtons
               value={conocimientosPrevios}
               onChange={setConocimientosPrevios}
@@ -744,90 +731,73 @@ export function EncuestaForm({
           </div>
 
           <div className="space-y-2">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Puntos positivos de la cátedra
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                ¿Cuáles considerás que fueron los mayores puntos positivos de la cátedra este ciclo lectivo?
-              </p>
-            </div>
+            <label className="block text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              Puntos positivos o fortalezas que destacarías de la cátedra:
+            </label>
             <textarea
               disabled={isReadOnly}
               rows={3}
               value={puntosPositivos}
               onChange={(e) => setPuntosPositivos(e.target.value)}
-              placeholder="Escribí aquí los puntos destacados..."
-              className="w-full rounded-2xl border border-stone-200 p-3.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 bg-white disabled:bg-stone-50 font-normal transition placeholder:text-stone-400"
+              placeholder="Escribí aquí lo que consideres más valioso..."
+              className="w-full bg-stone-50/50 border border-stone-200 rounded-2xl p-3.5 text-sm font-normal text-stone-800 placeholder-stone-400 focus:bg-white focus:border-stone-500 focus:outline-none transition resize-none disabled:bg-stone-50 disabled:text-stone-600"
             />
           </div>
 
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug">
-                Aspectos a revisar o mejorar
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                ¿Qué aspectos específicos considerás que deberían revisarse o mejorarse para las próximas cohortes?
-              </p>
-            </div>
+          <div className="space-y-2 pt-4 border-t border-stone-100">
+            <label className="block text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              Aspectos que considerás que se deberían mejorar o ajustar:
+            </label>
             <textarea
               disabled={isReadOnly}
               rows={3}
               value={aspectosAMejorar}
               onChange={(e) => setAspectosAMejorar(e.target.value)}
-              placeholder="Escribí aquí tus sugerencias de mejora..."
-              className="w-full rounded-2xl border border-stone-200 p-3.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 bg-white disabled:bg-stone-50 font-normal transition placeholder:text-stone-400"
+              placeholder="Sugerencias constructivas para futuras cursadas..."
+              className="w-full bg-stone-50/50 border border-stone-200 rounded-2xl p-3.5 text-sm font-normal text-stone-800 placeholder-stone-400 focus:bg-white focus:border-stone-500 focus:outline-none transition resize-none disabled:bg-stone-50 disabled:text-stone-600"
             />
           </div>
 
-          <div className="space-y-2 pt-5 border-t border-stone-100">
-            <div>
-              <h4 className="text-sm font-semibold text-stone-900 leading-snug flex items-center gap-1.5">
-                <span>Comentarios o sugerencias adicionales</span>
-                <span className="text-xs font-normal text-stone-400">(Opcional)</span>
-              </h4>
-              <p className="text-xs text-stone-500 font-normal mt-0.5 leading-relaxed">
-                Cualquier otro comentario o sugerencia que desees sumar a la cátedra.
-              </p>
-            </div>
+          <div className="space-y-2 pt-4 border-t border-stone-100">
+            <label className="block text-sm sm:text-base font-semibold text-stone-800 leading-snug">
+              Comentarios u observaciones adicionales que desees transmitir:
+            </label>
             <textarea
               disabled={isReadOnly}
               rows={2}
               value={comentariosAdicionales}
               onChange={(e) => setComentariosAdicionales(e.target.value)}
-              placeholder="Cualquier otro comentario que desees sumar..."
-              className="w-full rounded-2xl border border-stone-200 p-3.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 bg-white disabled:bg-stone-50 font-normal transition placeholder:text-stone-400"
+              placeholder="Cualquier otro comentario relevante..."
+              className="w-full bg-stone-50/50 border border-stone-200 rounded-2xl p-3.5 text-sm font-normal text-stone-800 placeholder-stone-400 focus:bg-white focus:border-stone-500 focus:outline-none transition resize-none disabled:bg-stone-50 disabled:text-stone-600"
             />
           </div>
         </section>
 
-        {/* Botón de Enviar (al final del formulario, sin flotar en pantalla) */}
-        <div className="pt-4 pb-12">
-          {isReadOnly ? (
-            <div className="bg-[#18181B] text-white p-4 rounded-2xl shadow-xs flex items-center justify-center gap-2 font-medium text-sm">
-              <Lock className="w-4 h-4 text-stone-400" /> Respuestas registradas - Modo revisión
-            </div>
-          ) : (
+        {/* Botón de Envío */}
+        {!isReadOnly && (
+          <div className="pt-2">
             <button
               type="submit"
-              disabled={submitting || !comision.activa}
-              className="w-full py-4 px-6 rounded-2xl bg-[#18181B] hover:bg-[#27272A] active:scale-[0.99] disabled:bg-stone-300 text-white font-medium text-sm sm:text-base border border-[#18181B] shadow-xs flex items-center justify-center gap-2.5 transition duration-150 cursor-pointer"
+              disabled={submitting}
+              className="w-full py-4 px-6 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-sm sm:text-base shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Registrando respuestas...</span>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Enviando respuestas...</span>
                 </>
               ) : (
                 <>
-                  <Send className="w-4 h-4 text-stone-300" />
-                  <span>Guardar y Enviar Encuesta</span>
+                  <Send className="w-4 h-4 text-emerald-400" />
+                  <span>Enviar Encuesta Anónima</span>
                 </>
               )}
             </button>
-          )}
-        </div>
+            <p className="text-center text-xs text-stone-400 mt-2.5 font-normal">
+              Al enviar confirmás que tus respuestas son definitivas y anónimas.
+            </p>
+          </div>
+        )}
       </form>
     </div>
   );

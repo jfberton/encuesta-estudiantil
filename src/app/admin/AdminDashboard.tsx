@@ -70,6 +70,7 @@ interface StatsData {
     promedioClaridad: number;
     promedioDisposicion: number;
     promedioPuntualidad: number;
+    promedioArticulacion?: number | null;
   }>;
   comentarios: Array<{
     id: number;
@@ -1085,14 +1086,10 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {stats.evaluacionesPorDocente.map((doc, idx) => {
-                        const promedioGeneral = Number(
-                          (
-                            (doc.promedioClaridad +
-                              doc.promedioDisposicion +
-                              doc.promedioPuntualidad) /
-                            3
-                          ).toFixed(2)
-                        );
+                        const tieneArticulacion = doc.tipoDocente === "practica" && doc.promedioArticulacion !== null && doc.promedioArticulacion !== undefined;
+                        const cantItems = tieneArticulacion ? 4 : 3;
+                        const sumaItems = doc.promedioClaridad + doc.promedioDisposicion + doc.promedioPuntualidad + (tieneArticulacion ? Number(doc.promedioArticulacion) : 0);
+                        const promedioGeneral = Number((sumaItems / cantItems).toFixed(2));
 
                         return (
                           <div
@@ -1149,6 +1146,21 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                                   style={{ width: `${(doc.promedioPuntualidad / 5) * 100}%` }}
                                 />
                               </div>
+
+                              {tieneArticulacion && (
+                                <>
+                                  <div className="flex justify-between items-center pt-1">
+                                    <span className="font-medium">Articulación Teoría-Práctica:</span>
+                                    <span className="font-bold">{doc.promedioArticulacion} / 5</span>
+                                  </div>
+                                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                    <div
+                                      className="bg-indigo-600 h-full rounded-full"
+                                      style={{ width: `${(Number(doc.promedioArticulacion) / 5) * 100}%` }}
+                                    />
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         );

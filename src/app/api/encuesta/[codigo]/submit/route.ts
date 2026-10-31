@@ -9,6 +9,7 @@ interface EvaluacionDocenteInput {
   claridadPedagogica: number;
   disposicionConsultas: number;
   puntualidadCumplimiento: number;
+  articulacionTeoriaPractica?: number | null;
 }
 
 export async function POST(
@@ -27,7 +28,6 @@ export async function POST(
       ajustePrograma,
       bibliografiaUtil,
       coherenciaExamenes,
-      articulacionTeoriaPractica,
       puntosPositivos,
       aspectosAMejorar,
       comentariosAdicionales,
@@ -100,14 +100,14 @@ export async function POST(
         ajustePrograma: Number(ajustePrograma) || 3,
         bibliografiaUtil: Number(bibliografiaUtil) || 3,
         coherenciaExamenes: Number(coherenciaExamenes) || 3,
-        articulacionTeoriaPractica: Number(articulacionTeoriaPractica) || 3,
+        articulacionTeoriaPractica: null, // Ahora se almacena específicamente por docente de práctica
         puntosPositivos: puntosPositivos?.trim() || null,
         aspectosAMejorar: aspectosAMejorar?.trim() || null,
         comentariosAdicionales: comentariosAdicionales?.trim() || null,
       })
       .returning();
 
-    // 4. Insertar evaluaciones de docentes (si las hay)
+    // 4. Insertar evaluaciones de docentes
     if (Array.isArray(evaluacionesDocentes) && evaluacionesDocentes.length > 0) {
       const records = evaluacionesDocentes
         .filter((ev: EvaluacionDocenteInput) => ev.docenteId && ev.docenteId > 0)
@@ -118,6 +118,10 @@ export async function POST(
           claridadPedagogica: Math.min(5, Math.max(1, Number(ev.claridadPedagogica) || 3)),
           disposicionConsultas: Math.min(5, Math.max(1, Number(ev.disposicionConsultas) || 3)),
           puntualidadCumplimiento: Math.min(5, Math.max(1, Number(ev.puntualidadCumplimiento) || 3)),
+          articulacionTeoriaPractica:
+            ev.tipoDocente === "practica" && ev.articulacionTeoriaPractica
+              ? Math.min(5, Math.max(1, Number(ev.articulacionTeoriaPractica)))
+              : null,
         }));
 
       if (records.length > 0) {

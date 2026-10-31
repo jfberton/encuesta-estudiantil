@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { comisiones, docentes, respuestas, respuestasDocentes } from "@/db/schema";
 import { getAdminSession } from "@/lib/auth";
-import { eq, sql, and, desc } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   const session = await getAdminSession();
@@ -62,13 +62,26 @@ export async function GET(req: NextRequest) {
       const sumaAjuste = respuestasList.reduce((acc, r) => acc + r.ajustePrograma, 0);
       const sumaBiblio = respuestasList.reduce((acc, r) => acc + r.bibliografiaUtil, 0);
       const sumaExamenes = respuestasList.reduce((acc, r) => acc + r.coherenciaExamenes, 0);
-      const sumaArticulacion = respuestasList.reduce((acc, r) => acc + r.articulacionTeoriaPractica, 0);
+
+      // Calcular promedio de articulación desde respuestas_docentes (práctica)
+      const articulacionQuery = db
+        .select({
+          promedio: sql<number | null>`round(avg(${respuestasDocentes.articulacionTeoriaPractica})::numeric, 2)::float`,
+        })
+        .from(respuestasDocentes)
+        .innerJoin(respuestas, eq(respuestasDocentes.respuestaId, respuestas.id));
+
+      const [articulacionRes] = await (comisionId
+        ? articulacionQuery.where(eq(respuestas.comisionId, comisionId))
+        : articulacionQuery);
+
+      const promArticulacion = articulacionRes?.promedio ?? 0;
 
       promediosGenerales = {
         ajustePrograma: Number((sumaAjuste / total).toFixed(2)),
         bibliografiaUtil: Number((sumaBiblio / total).toFixed(2)),
         coherenciaExamenes: Number((sumaExamenes / total).toFixed(2)),
-        articulacionTeoriaPractica: Number((sumaArticulacion / total).toFixed(2)),
+        articulacionTeoriaPractica: promArticulacion,
       };
 
       const recursantes = respuestasList.filter((r) => r.recursante).length;
@@ -95,6 +108,7 @@ export async function GET(req: NextRequest) {
         promedioClaridad: sql<number>`round(avg(${respuestasDocentes.claridadPedagogica})::numeric, 2)::float`,
         promedioDisposicion: sql<number>`round(avg(${respuestasDocentes.disposicionConsultas})::numeric, 2)::float`,
         promedioPuntualidad: sql<number>`round(avg(${respuestasDocentes.puntualidadCumplimiento})::numeric, 2)::float`,
+        promedioArticulacion: sql<number | null>`round(avg(${respuestasDocentes.articulacionTeoriaPractica})::numeric, 2)::float`,
       })
       .from(respuestasDocentes)
       .innerJoin(docentes, eq(respuestasDocentes.docenteId, docentes.id))

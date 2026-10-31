@@ -45,9 +45,9 @@ export const respuestas = pgTable(
     ajustePrograma: integer("ajuste_programa").notNull(),
     bibliografiaUtil: integer("bibliografia_util").notNull(),
     
-    // 3. Evaluaciones (1 al 5)
+    // 3. Evaluaciones generales (1 al 5)
     coherenciaExamenes: integer("coherencia_examenes").notNull(),
-    articulacionTeoriaPractica: integer("articulacion_teoria_practica").notNull(),
+    articulacionTeoriaPractica: integer("articulacion_teoria_practica"), // Opcional / retrocompatible
     
     // 4. Preguntas Abiertas
     puntosPositivos: text("puntos_positivos"),
@@ -73,6 +73,7 @@ export const respuestasDocentes = pgTable("respuestas_docentes", {
   claridadPedagogica: integer("claridad_pedagogica").notNull(), // 1 al 5
   disposicionConsultas: integer("disposicion_consultas").notNull(), // 1 al 5
   puntualidadCumplimiento: integer("puntualidad_cumplimiento").notNull(), // 1 al 5
+  articulacionTeoriaPractica: integer("articulacion_teoria_practica"), // 1 al 5 (específico para profesores de práctica)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
