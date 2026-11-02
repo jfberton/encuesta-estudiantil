@@ -102,7 +102,7 @@ function getGeminiApiKey(): string {
   }
   // Fallback decodificado para entorno de producción si no está seteada la variable en Cloudflare
   return Buffer.from(
-    "QVEuQWI4Uk42SklXTm41YlZKVVFFYkdKMnJTbi1lR3NiNlZzeTNiZWk4RC03aFJfLUduanc=",
+    "QVEuQWI4Uk42SklXTm41YlZKVVFFYkdKMmpTbi1lR3NiNlZzeTNiZWk4RC03aFJmLUduanc=",
     "base64"
   ).toString("utf-8");
 }
