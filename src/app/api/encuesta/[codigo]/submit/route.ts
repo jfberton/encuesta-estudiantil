@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { comisiones, respuestas, respuestasDocentes } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, like, desc } from "drizzle-orm";
 
 interface EvaluacionDocenteInput {
   docenteId: number;
@@ -69,23 +69,80 @@ export async function POST(
       );
     }
 
-    // 2. Validar que este dispositivo no haya enviado previamente
-    const [existente] = await db
+    // 2. Validación Híbrida Antifraude:
+    // Desglosar identificación: UUID de navegador + Hash de modelo de hardware
+    let clientUuid = deviceFingerprint;
+    let hardwareHash = "";
+
+    if (deviceFingerprint.includes(":::")) {
+      const parts = deviceFingerprint.split(":::");
+      clientUuid = parts[0];
+      hardwareHash = parts[1] || "";
+    }
+
+    // Regla A (Mismo navegador): Bloquear si este navegador específico ya votó en esta comisión
+    const [existentePorUuid] = await db
       .select({ id: respuestas.id })
       .from(respuestas)
       .where(
         and(
           eq(respuestas.comisionId, comision.id),
-          eq(respuestas.deviceFingerprint, deviceFingerprint)
+          or(
+            eq(respuestas.deviceFingerprint, clientUuid),
+            like(respuestas.deviceFingerprint, `${clientUuid}:::%`)
+          )
         )
       )
       .limit(1);
 
-    if (existente) {
+    if (existentePorUuid) {
       return NextResponse.json(
         { error: "Este dispositivo ya registró una respuesta para esta comisión." },
         { status: 409 }
       );
+    }
+
+    // Regla B (Control de abuso en Incógnito por modelo de teléfono):
+    // Si alguien abre pestañas de incógnito repetidas en el mismo aparato:
+    if (hardwareHash) {
+      const respuestasMismoHardware = await db
+        .select({ id: respuestas.id, createdAt: respuestas.createdAt })
+        .from(respuestas)
+        .where(
+          and(
+            eq(respuestas.comisionId, comision.id),
+            or(
+              eq(respuestas.deviceFingerprint, hardwareHash),
+              like(respuestas.deviceFingerprint, `%:::${hardwareHash}`)
+            )
+          )
+        )
+        .orderBy(desc(respuestas.createdAt));
+
+      // B.1 Cooldown de 60 segundos: no se permiten dos envíos del mismo hardware casi simultáneos
+      if (respuestasMismoHardware.length > 0) {
+        const ultimoVoto = respuestasMismoHardware[0];
+        const segundosDesdeUltimo = (Date.now() - new Date(ultimoVoto.createdAt).getTime()) / 1000;
+        if (segundosDesdeUltimo < 60) {
+          return NextResponse.json(
+            {
+              error: "Se detectó un envío reciente desde este modelo de teléfono. Por favor, aguardá un minuto para enviar.",
+            },
+            { status: 429 }
+          );
+        }
+      }
+
+      // B.2 Tolerancia de modelos idénticos por comisión:
+      // Permite hasta 4 alumnos en la misma aula con el mismo modelo exacto de teléfono
+      if (respuestasMismoHardware.length >= 4) {
+        return NextResponse.json(
+          {
+            error: "Se ha alcanzado el límite de respuestas permitidas para este modelo de teléfono en esta comisión.",
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // 3. Insertar respuesta principal

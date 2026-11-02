@@ -1145,7 +1145,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                 className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
               >
                 <FileSpreadsheet className="w-4 h-4" />
-                <span>Descargar Informe Excel (CSV)</span>
+                <span>Descargar Informe Excel (.xlsx)</span>
               </a>
             </div>
 
