@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -25,6 +25,11 @@ import {
   Clock,
   AlertTriangle,
   Loader2,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Lightbulb,
+  ThumbsUp,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { UnneLogo } from "@/components/UnneLogo";
@@ -82,6 +87,28 @@ interface StatsData {
   }>;
 }
 
+interface SintesisData {
+  resumenEjecutivo: string;
+  aspectosPositivos: Array<{
+    tema: string;
+    porcentajeEstimado: number;
+    descripcion: string;
+    citas: string[];
+  }>;
+  aspectosAMejorar: Array<{
+    tema: string;
+    porcentajeEstimado: number;
+    descripcion: string;
+    sugerenciaAccion: string;
+    citas: string[];
+  }>;
+  observacionesGenerales: Array<{
+    tema: string;
+    detalle: string;
+    citas: string[];
+  }>;
+}
+
 export function AdminDashboard({ adminName }: { adminName: string }) {
   const router = useRouter();
   const [tab, setTab] = useState<"comisiones" | "docentes" | "stats">("comisiones");
@@ -110,17 +137,102 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
   // Copiado feedback
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  // Cargar comisiones
-  const cargarComisiones = useCallback(async () => {
+  // Estado Síntesis IA y Persistencia en BD
+  const [sintesis, setSintesis] = useState<SintesisData | null>(null);
+  const [sintesisGuardada, setSintesisGuardada] = useState<{
+    totalRespuestasAlGenerar: number;
+    updatedAt: string;
+  } | null>(null);
+  const [hayNuevasRespuestas, setHayNuevasRespuestas] = useState(false);
+  const [respuestasNuevasCount, setRespuestasNuevasCount] = useState(0);
+  const [cargandoSintesis, setCargandoSintesis] = useState(false);
+  const [errorSintesis, setErrorSintesis] = useState<string | null>(null);
+  const [vistaComentarios, setVistaComentarios] = useState<"sintesis" | "individuales">("individuales");
+  const [expandedTemas, setExpandedTemas] = useState<Record<string, boolean>>({});
+
+  const toggleExpandTema = (key: string) => {
+    setExpandedTemas((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Cargar estado de síntesis guardada en base de datos para la comisión actual
+  const cargarSintesisGuardada = useCallback(async (comisionId: number | null) => {
     try {
-      setLoadingComisiones(true);
+      const url = comisionId
+        ? `/api/admin/sintesis-ia?comisionId=${comisionId}`
+        : "/api/admin/sintesis-ia";
+      const res = await fetch(url);
+      const data = await res.json();
+      if (res.ok) {
+        if (data.guardado) {
+          setSintesis(data.guardado.sintesis);
+          setSintesisGuardada({
+            totalRespuestasAlGenerar: data.guardado.totalRespuestasAlGenerar,
+            updatedAt: data.guardado.updatedAt,
+          });
+          setHayNuevasRespuestas(Boolean(data.hayNuevasRespuestas));
+          setRespuestasNuevasCount(data.respuestasNuevasCount || 0);
+          setVistaComentarios("sintesis");
+        } else {
+          setSintesis(null);
+          setSintesisGuardada(null);
+          setHayNuevasRespuestas(false);
+          setRespuestasNuevasCount(0);
+          setVistaComentarios("individuales");
+        }
+      }
+    } catch (e) {
+      console.error("Error al cargar síntesis guardada:", e);
+    }
+  }, []);
+
+  // Invocar generación o recálculo de síntesis con IA
+  const handleGenerarSintesis = async () => {
+    try {
+      setCargandoSintesis(true);
+      setErrorSintesis(null);
+
+      const res = await fetch("/api/admin/sintesis-ia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comisionId: selectedComisionId }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Error al procesar la síntesis con IA");
+      }
+
+      setSintesis(data.sintesis);
+      setSintesisGuardada({
+        totalRespuestasAlGenerar: data.totalRespuestasAlGenerar,
+        updatedAt: data.updatedAt,
+      });
+      setHayNuevasRespuestas(false);
+      setRespuestasNuevasCount(0);
+      setVistaComentarios("sintesis");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error inesperado al generar la síntesis con IA";
+      setErrorSintesis(msg);
+    } finally {
+      setCargandoSintesis(false);
+    }
+  };
+
+  const hayEncuestasAbiertas = comisiones.some((c) => c.activa);
+
+  // Cargar comisiones (con soporte de silent para auto-refresh en vivo)
+  const cargarComisiones = useCallback(async (silent = false) => {
+    try {
+      if (!silent) setLoadingComisiones(true);
       const res = await fetch("/api/admin/comisiones");
       const data = await res.json();
       if (res.ok) {
         setComisiones(data.comisiones || []);
       }
+    } catch (err) {
+      console.error("Error al cargar comisiones:", err);
     } finally {
-      setLoadingComisiones(false);
+      if (!silent) setLoadingComisiones(false);
     }
   }, []);
 
@@ -138,10 +250,10 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
     }
   }, []);
 
-  // Cargar estadísticas
-  const cargarStats = useCallback(async (comisionId: number | null = null) => {
+  // Cargar estadísticas (con soporte de silent para auto-refresh en vivo)
+  const cargarStats = useCallback(async (comisionId: number | null = null, silent = false) => {
     try {
-      setLoadingStats(true);
+      if (!silent) setLoadingStats(true);
       const url = comisionId
         ? `/api/admin/stats?comisionId=${comisionId}`
         : "/api/admin/stats";
@@ -150,16 +262,85 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
       if (res.ok) {
         setStats(data);
       }
+    } catch (err) {
+      console.error("Error al cargar estadísticas:", err);
     } finally {
-      setLoadingStats(false);
+      if (!silent) setLoadingStats(false);
     }
   }, []);
 
+  // Carga inicial
   useEffect(() => {
     cargarComisiones();
     cargarDocentes();
     cargarStats();
-  }, [cargarComisiones, cargarDocentes, cargarStats]);
+    cargarSintesisGuardada(null);
+  }, [cargarComisiones, cargarDocentes, cargarStats, cargarSintesisGuardada]);
+
+  // Referencias para el polling en vivo sin recrear el temporizador
+  const tabRef = useRef(tab);
+  useEffect(() => {
+    tabRef.current = tab;
+  }, [tab]);
+
+  const selectedComisionIdRef = useRef(selectedComisionId);
+  useEffect(() => {
+    selectedComisionIdRef.current = selectedComisionId;
+  }, [selectedComisionId]);
+
+  const cargarComisionesRef = useRef(cargarComisiones);
+  cargarComisionesRef.current = cargarComisiones;
+
+  const cargarStatsRef = useRef(cargarStats);
+  cargarStatsRef.current = cargarStats;
+
+  // Polling automático tipo cron:
+  // - Activo automáticamente mientras haya al menos una encuesta abierta en clase.
+  // - Pausa automática si la pestaña del navegador pasa a segundo plano (visibilidad oculta).
+  // - Reanuda inmediatamente cuando el docente vuelve a la pestaña activa.
+  useEffect(() => {
+    if (!hayEncuestasAbiertas) return;
+
+    let isFetching = false;
+
+    const tick = async () => {
+      // Pausa automática si la pestaña no está visible
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+        return;
+      }
+      if (isFetching) return;
+
+      try {
+        isFetching = true;
+        // 1. Siempre refrescar comisiones para actualizar conteo de votos en vivo
+        await cargarComisionesRef.current(true);
+
+        // 2. Si el docente está en la pestaña de resultados, refrescar métricas y comentarios en vivo
+        if (tabRef.current === "stats") {
+          await cargarStatsRef.current(selectedComisionIdRef.current, true);
+        }
+      } catch (err) {
+        console.error("Error en sincronización en vivo:", err);
+      } finally {
+        isFetching = false;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        tick();
+      }
+    };
+
+    // Consulta periódica cada 4 segundos
+    const intervalId = setInterval(tick, 4000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [hayEncuestasAbiertas]);
 
   // Manejar toggle de comisión (Habilitar / Cerrar)
   const toggleComision = async (id: number) => {
@@ -340,6 +521,15 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
           <UnneLogo className="h-10 sm:h-11 w-auto" subtitulo="Cátedra: Matemática Financiera" />
 
           <div className="flex items-center gap-3">
+            {hayEncuestasAbiertas && (
+              <span
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"
+                title="Sincronización en vivo activa (actualización automática sin recargar página)"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>En vivo</span>
+              </span>
+            )}
             <span className="hidden sm:inline-block text-xs font-medium text-stone-500 bg-stone-100 px-3 py-1.5 rounded-full">
               {adminName}
             </span>
@@ -375,6 +565,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
             onClick={() => {
               setTab("stats");
               cargarStats(selectedComisionId);
+              cargarSintesisGuardada(selectedComisionId);
             }}
             className={`py-3.5 px-2 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer transition ${
               tab === "stats"
@@ -588,6 +779,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                             setSelectedComisionId(c.id);
                             setTab("stats");
                             cargarStats(c.id);
+                            cargarSintesisGuardada(c.id);
                           }}
                           className="py-1.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition"
                         >
@@ -923,6 +1115,7 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                     const val = e.target.value ? parseInt(e.target.value, 10) : null;
                     setSelectedComisionId(val);
                     cargarStats(val);
+                    cargarSintesisGuardada(val);
                   }}
                   className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#0A2540] focus:outline-none"
                 >
@@ -933,6 +1126,13 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                     </option>
                   ))}
                 </select>
+
+                {hayEncuestasAbiertas && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    En vivo
+                  </span>
+                )}
               </div>
 
               <a
@@ -1169,54 +1369,446 @@ export function AdminDashboard({ adminName }: { adminName: string }) {
                   )}
                 </div>
 
-                {/* Respuestas Cualitativas */}
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
-                  <h3 className="font-extrabold text-sm text-slate-900 tracking-tight flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-amber-600" />
-                    Respuestas Cualitativas y Sugerencias de los Alumnos
-                  </h3>
+                {/* Respuestas Cualitativas y Síntesis Asistida por IA */}
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-6">
+                  {/* Cabecera del Módulo Cualitativo */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-amber-600" />
+                        <h3 className="font-extrabold text-base text-slate-900 tracking-tight">
+                          Respuestas Cualitativas y Sugerencias
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        {stats.comentarios.length} estudiante{stats.comentarios.length === 1 ? "" : "s"} aportaron observaciones de texto libre.
+                      </p>
+                    </div>
 
-                  {stats.comentarios.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">
-                      No hay comentarios o sugerencias abiertas registradas en este período.
-                    </p>
-                  ) : (
-                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 divide-y divide-slate-100">
-                      {stats.comentarios.map((c) => (
-                        <div key={c.id} className="pt-3 first:pt-0 space-y-2 text-xs">
-                          <span className="font-bold text-slate-600 text-[11px]">
-                            {c.comisionNombre} • {new Date(c.createdAt).toLocaleDateString("es-AR")}
-                          </span>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      {sintesisGuardada ? (
+                        hayNuevasRespuestas ? (
+                          <div className="flex items-center gap-2">
+                            <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                              +{respuestasNuevasCount} {respuestasNuevasCount === 1 ? "nueva respuesta" : "nuevas"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleGenerarSintesis}
+                              disabled={cargandoSintesis || stats.comentarios.length === 0}
+                              className="py-2 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+                            >
+                              {cargandoSintesis ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                  <span>Recalculando...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="w-3.5 h-3.5 text-white" />
+                                  <span>Recalcular Síntesis</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Al día ({sintesisGuardada.totalRespuestasAlGenerar} respuestas)</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleGenerarSintesis}
+                              disabled={cargandoSintesis || stats.comentarios.length === 0}
+                              className="py-1.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                              title="Forzar recálculo con Gemini"
+                            >
+                              {cargandoSintesis ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" />
+                              ) : (
+                                <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+                              )}
+                              <span>Recalcular</span>
+                            </button>
+                          </div>
+                        )
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleGenerarSintesis}
+                          disabled={cargandoSintesis || stats.comentarios.length === 0}
+                          className="py-2.5 px-4 rounded-xl bg-[#18181B] hover:bg-[#27272A] disabled:bg-slate-300 text-white font-bold text-xs shadow-sm transition flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                        >
+                          {cargandoSintesis ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+                              <span>Analizando con IA...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 text-amber-400" />
+                              <span>Generar Síntesis con IA</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
-                          {c.puntosPositivos && (
-                            <div className="bg-emerald-50/60 border border-emerald-100 p-3 rounded-xl">
-                              <span className="font-bold text-emerald-900 block text-[11px] mb-0.5">
-                                Puntos Positivos:
-                              </span>
-                              <p className="text-slate-800 italic">"{c.puntosPositivos}"</p>
+                  {/* Selector de Vistas: Síntesis vs Individuales */}
+                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <button
+                      type="button"
+                      onClick={() => setVistaComentarios("sintesis")}
+                      className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                        vistaComentarios === "sintesis"
+                          ? "bg-stone-900 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Síntesis Inteligente</span>
+                      {sintesis && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setVistaComentarios("individuales")}
+                      className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                        vistaComentarios === "individuales"
+                          ? "bg-stone-900 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Ver Respuestas Individuales ({stats.comentarios.length})</span>
+                    </button>
+                  </div>
+
+                  {/* Alerta de Error en Síntesis */}
+                  {errorSintesis && (
+                    <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl text-xs flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>{errorSintesis}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGenerarSintesis}
+                        className="text-xs font-bold underline hover:no-underline text-rose-900 cursor-pointer"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  )}
+
+                  {/* VISTA 1: SÍNTESIS INTELIGENTE ASISTIDA POR IA */}
+                  {vistaComentarios === "sintesis" && (
+                    <>
+                      {cargandoSintesis ? (
+                        <div className="p-12 text-center text-slate-500 space-y-3 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                          <Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-600" />
+                          <h4 className="font-bold text-sm text-slate-800">
+                            Procesando y agrupando comentarios con Gemini...
+                          </h4>
+                          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                            Extrayendo patrones representativos, calculando porcentajes de mención y seleccionando citas textuales.
+                          </p>
+                        </div>
+                      ) : !sintesis ? (
+                        <div className="p-10 text-center space-y-3 bg-slate-50/60 rounded-3xl border border-dashed border-slate-300">
+                          <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto">
+                            <Sparkles className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-slate-800">
+                              Aún no has generado la síntesis con IA para esta selección
+                            </h4>
+                            <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
+                              Hacé clic en el botón superior para que el asistente clasifique los {stats.comentarios.length} comentarios de los alumnos en fortalezas, áreas de mejora y observaciones.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleGenerarSintesis}
+                            disabled={stats.comentarios.length === 0}
+                            className="py-2.5 px-4 bg-[#18181B] hover:bg-[#27272A] disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-sm transition inline-flex items-center gap-2 cursor-pointer"
+                          >
+                            <Sparkles className="w-4 h-4 text-amber-400" />
+                            <span>Generar Síntesis Ahora</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          {/* Banner de Nuevas Respuestas Disponibles */}
+                          {sintesisGuardada && hayNuevasRespuestas && (
+                            <div className="bg-amber-50/90 border-2 border-amber-300 text-amber-950 p-4 rounded-2xl text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
+                              <div className="flex items-start gap-2.5">
+                                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                <div>
+                                  <span className="font-extrabold text-xs block text-amber-900">
+                                    ¡Nuevas respuestas recibidas en el aula! ({sintesisGuardada.totalRespuestasAlGenerar} ➔ {stats.total} respuestas)
+                                  </span>
+                                  <p className="text-amber-800 text-[11px] mt-0.5">
+                                    Se registraron <strong>{respuestasNuevasCount} {respuestasNuevasCount === 1 ? "nueva respuesta" : "nuevas respuestas"}</strong> desde el último análisis. Los resultados de abajo corresponden a la versión previa.
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleGenerarSintesis}
+                                disabled={cargandoSintesis}
+                                className="py-2 px-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Recalcular con Nuevas Respuestas</span>
+                              </button>
                             </div>
                           )}
 
-                          {c.aspectosAMejorar && (
-                            <div className="bg-amber-50/60 border border-amber-100 p-3 rounded-xl">
-                              <span className="font-bold text-amber-900 block text-[11px] mb-0.5">
-                                Aspectos a Mejorar:
+                          {/* Diagnóstico / Resumen Ejecutivo */}
+                          <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 sm:p-6 rounded-3xl shadow-sm space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-amber-400" />
+                              <span className="text-[11px] font-extrabold text-amber-300 uppercase tracking-wider">
+                                Diagnóstico Pedagógico Ejecutivo
                               </span>
-                              <p className="text-slate-800 italic">"{c.aspectosAMejorar}"</p>
                             </div>
-                          )}
+                            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                              "{sintesis.resumenEjecutivo}"
+                            </p>
+                          </div>
 
-                          {c.comentariosAdicionales && (
-                            <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-xl">
-                              <span className="font-bold text-slate-700 block text-[11px] mb-0.5">
-                                Comentarios Adicionales:
-                              </span>
-                              <p className="text-slate-800 italic">"{c.comentariosAdicionales}"</p>
+                          {/* Grid de Fortalezas y Oportunidades de Mejora */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Columna: Puntos Positivos */}
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-extrabold text-xs text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                                  <ThumbsUp className="w-4 h-4 text-emerald-600" />
+                                  <span>Aspectos Más Valorados ({sintesis.aspectosPositivos.length})</span>
+                                </h4>
+                              </div>
+
+                              <div className="space-y-3">
+                                {sintesis.aspectosPositivos.map((item, idx) => {
+                                  const key = `pos-${idx}`;
+                                  const isExpanded = Boolean(expandedTemas[key]);
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-4 space-y-2.5 transition"
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <h5 className="font-bold text-xs text-emerald-950">
+                                          {item.tema}
+                                        </h5>
+                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                                          ~{item.porcentajeEstimado}% menciones
+                                        </span>
+                                      </div>
+
+                                      <p className="text-xs text-slate-700 leading-snug">
+                                        {item.descripcion}
+                                      </p>
+
+                                      {item.citas && item.citas.length > 0 && (
+                                        <div className="pt-2 border-t border-emerald-200/60">
+                                          <button
+                                            type="button"
+                                            onClick={() => toggleExpandTema(key)}
+                                            className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 cursor-pointer"
+                                          >
+                                            {isExpanded ? (
+                                              <>
+                                                <ChevronUp className="w-3.5 h-3.5" />
+                                                <span>Ocultar citas de alumnos ({item.citas.length})</span>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <ChevronDown className="w-3.5 h-3.5" />
+                                                <span>Ver citas textuales ({item.citas.length})</span>
+                                              </>
+                                            )}
+                                          </button>
+
+                                          {isExpanded && (
+                                            <div className="mt-2 space-y-1.5 pl-2 border-l-2 border-emerald-400">
+                                              {item.citas.map((cita, cIdx) => (
+                                                <p
+                                                  key={cIdx}
+                                                  className="text-[11px] text-slate-700 italic"
+                                                >
+                                                  "{cita}"
+                                                </p>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Columna: Oportunidades de Mejora */}
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-extrabold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                  <span>Aspectos a Mejorar y Ajustes ({sintesis.aspectosAMejorar.length})</span>
+                                </h4>
+                              </div>
+
+                              <div className="space-y-3">
+                                {sintesis.aspectosAMejorar.map((item, idx) => {
+                                  const key = `mej-${idx}`;
+                                  const isExpanded = Boolean(expandedTemas[key]);
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-4 space-y-2.5 transition"
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <h5 className="font-bold text-xs text-amber-950">
+                                          {item.tema}
+                                        </h5>
+                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 shrink-0">
+                                          ~{item.porcentajeEstimado}% menciones
+                                        </span>
+                                      </div>
+
+                                      <p className="text-xs text-slate-700 leading-snug">
+                                        {item.descripcion}
+                                      </p>
+
+                                      {item.sugerenciaAccion && (
+                                        <div className="bg-white/80 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2 text-[11px] text-amber-950">
+                                          <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                                          <div>
+                                            <strong>Sugerencia de acción:</strong> {item.sugerenciaAccion}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {item.citas && item.citas.length > 0 && (
+                                        <div className="pt-2 border-t border-amber-200/60">
+                                          <button
+                                            type="button"
+                                            onClick={() => toggleExpandTema(key)}
+                                            className="text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer"
+                                          >
+                                            {isExpanded ? (
+                                              <>
+                                                <ChevronUp className="w-3.5 h-3.5" />
+                                                <span>Ocultar citas de alumnos ({item.citas.length})</span>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <ChevronDown className="w-3.5 h-3.5" />
+                                                <span>Ver citas textuales ({item.citas.length})</span>
+                                              </>
+                                            )}
+                                          </button>
+
+                                          {isExpanded && (
+                                            <div className="mt-2 space-y-1.5 pl-2 border-l-2 border-amber-400">
+                                              {item.citas.map((cita, cIdx) => (
+                                                <p
+                                                  key={cIdx}
+                                                  className="text-[11px] text-slate-700 italic"
+                                                >
+                                                  "{cita}"
+                                                </p>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Fila: Observaciones y Sugerencias Misceláneas */}
+                          {sintesis.observacionesGenerales && sintesis.observacionesGenerales.length > 0 && (
+                            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-3">
+                              <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <MessageSquare className="w-4 h-4 text-slate-500" />
+                                <span>Otras Observaciones Destacadas</span>
+                              </h4>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {sintesis.observacionesGenerales.map((obs, oIdx) => (
+                                  <div key={oIdx} className="bg-white p-3 rounded-xl border border-slate-200/60 space-y-1">
+                                    <h6 className="font-bold text-xs text-slate-900">{obs.tema}</h6>
+                                    <p className="text-[11px] text-slate-600">{obs.detalle}</p>
+                                    {obs.citas && obs.citas.length > 0 && (
+                                      <p className="text-[10px] text-slate-500 italic pt-1 border-t border-slate-100">
+                                        "{obs.citas[0]}"
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* VISTA 2: RESPUESTAS INDIVIDUALES CLÁSICAS */}
+                  {vistaComentarios === "individuales" && (
+                    <>
+                      {stats.comentarios.length === 0 ? (
+                        <p className="text-xs text-slate-400 italic">
+                          No hay comentarios o sugerencias abiertas registradas en este período.
+                        </p>
+                      ) : (
+                        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 divide-y divide-slate-100">
+                          {stats.comentarios.map((c) => (
+                            <div key={c.id} className="pt-3 first:pt-0 space-y-2 text-xs">
+                              <span className="font-bold text-slate-600 text-[11px]">
+                                {c.comisionNombre} • {new Date(c.createdAt).toLocaleDateString("es-AR")}
+                              </span>
+
+                              {c.puntosPositivos && (
+                                <div className="bg-emerald-50/60 border border-emerald-100 p-3 rounded-xl">
+                                  <span className="font-bold text-emerald-900 block text-[11px] mb-0.5">
+                                    Puntos Positivos:
+                                  </span>
+                                  <p className="text-slate-800 italic">"{c.puntosPositivos}"</p>
+                                </div>
+                              )}
+
+                              {c.aspectosAMejorar && (
+                                <div className="bg-amber-50/60 border border-amber-100 p-3 rounded-xl">
+                                  <span className="font-bold text-amber-900 block text-[11px] mb-0.5">
+                                    Aspectos a Mejorar:
+                                  </span>
+                                  <p className="text-slate-800 italic">"{c.aspectosAMejorar}"</p>
+                                </div>
+                              )}
+
+                              {c.comentariosAdicionales && (
+                                <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-xl">
+                                  <span className="font-bold text-slate-700 block text-[11px] mb-0.5">
+                                    Comentarios Adicionales:
+                                  </span>
+                                  <p className="text-slate-800 italic">"{c.comentariosAdicionales}"</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

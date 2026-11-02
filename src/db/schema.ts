@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const administradores = pgTable("administradores", {
@@ -104,3 +104,13 @@ export const respuestasDocentesRelations = relations(respuestasDocentes, ({ one 
 export const docentesRelations = relations(docentes, ({ many }) => ({
   evaluaciones: many(respuestasDocentes),
 }));
+
+// Tabla de caché persistente para el análisis y síntesis cualitativa con IA
+export const sintesisAnalisis = pgTable("sintesis_analisis", {
+  id: serial("id").primaryKey(),
+  comisionId: integer("comision_id").references(() => comisiones.id, { onDelete: "cascade" }), // null para consolidado general
+  totalRespuestasAlGenerar: integer("total_respuestas_al_generar").notNull(),
+  sintesis: jsonb("sintesis").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
